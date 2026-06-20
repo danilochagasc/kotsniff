@@ -1,22 +1,25 @@
 plugins {
-    kotlin("jvm") version "2.3.21"
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlinter) apply false
 }
 
-group = "com.br.danilo"
-version = "1.0-SNAPSHOT"
+allprojects {
+    group = "br.com.kotsniff"
+    version = "0.0.1"
 
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-    testImplementation(kotlin("test"))
-}
+subprojects {
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 
-kotlin {
-    jvmToolchain(17)
-}
-
-tasks.test {
-    useJUnitPlatform()
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        the<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension>().jvmToolchain(17)
+        apply(plugin = libs.plugins.kotlinter.get().pluginId)
+    }
 }
