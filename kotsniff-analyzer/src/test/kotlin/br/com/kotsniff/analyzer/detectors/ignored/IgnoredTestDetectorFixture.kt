@@ -9,7 +9,7 @@ object IgnoredTestDetectorFixture {
     fun ignoredStringSpec() =
         """
         class SampleIgnoredStringSpec : StringSpec({
-            !"ignored string test" {
+            "!ignored string test" {
                 val result = 1 + 1
             }
         })

@@ -9,4 +9,5 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(
     "kotsniff-core",
     "kotsniff-analyzer",
+    "kotsniff-cli",
 )

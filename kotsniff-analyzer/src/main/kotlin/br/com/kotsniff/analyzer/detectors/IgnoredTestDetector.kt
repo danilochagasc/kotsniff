@@ -6,9 +6,15 @@ import br.com.kotsniff.core.enums.TestSmell.IGNORED_TEST
 import br.com.kotsniff.core.models.DetectionResult
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
-import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.psiUtil.getParentOfType
 
+/**
+ * Detects ignored/disabled tests using three strategies:
+ *
+ * 1. **Bang prefix**: Test name starts with `!` (e.g., `test("!disabled") { }`)
+ * 2. **X-prefix DSL**: Functions like `xtest`, `xdescribe`, `xit`, etc.
+ * 3. **Class-level annotations**: `@Ignored`, `@Disabled`, `@Ignore` on the Spec class.
+ */
 class IgnoredTestDetector : TestSmellDetector {
     override fun detect(
         testBlock: KotestBlock,
@@ -16,11 +22,11 @@ class IgnoredTestDetector : TestSmellDetector {
     ): List<DetectionResult> {
         val expr = testBlock.originalExpression
 
+        // 1. Class-level annotations (@Ignored, @Disabled, @Ignore)
         val parentClass = expr.getParentOfType<KtClassOrObject>(true)
-        val ignoreAnnotations = listOf("Ignored", "Disabled", "Ignore")
         val classAnnotation =
             parentClass?.annotationEntries?.firstOrNull {
-                it.shortName?.asString() in ignoreAnnotations
+                it.shortName?.asString() in IGNORE_ANNOTATIONS
             }
 
         if (classAnnotation != null) {
@@ -33,17 +39,18 @@ class IgnoredTestDetector : TestSmellDetector {
             )
         }
 
-        val parent = expr.parent
-        if (parent is KtPrefixExpression && parent.operationReference.text == "!") {
+        // 2. Bang prefix: test name starts with "!"
+        if (testBlock.name.startsWith("!")) {
             return listOf(
                 DetectionResult(
                     smellType = IGNORED_TEST,
-                    location = parent.toCodeLocation(filePath),
-                    codeSnippet = parent.text,
+                    location = expr.toCodeLocation(filePath),
+                    codeSnippet = expr.text,
                 ),
             )
         }
 
+        // 3. X-prefix DSL functions (xtest, xdescribe, xit, etc.)
         val callee = expr.calleeExpression
         if (callee is KtNameReferenceExpression && callee.getReferencedName().startsWith("x")) {
             return listOf(
@@ -56,5 +63,9 @@ class IgnoredTestDetector : TestSmellDetector {
         }
 
         return emptyList()
+    }
+
+    companion object {
+        private val IGNORE_ANNOTATIONS = listOf("Ignored", "Disabled", "Ignore")
     }
 }

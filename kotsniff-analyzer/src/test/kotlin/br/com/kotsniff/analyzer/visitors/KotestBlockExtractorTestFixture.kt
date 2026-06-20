@@ -57,4 +57,32 @@ object KotestBlockExtractorTestFixture {
             }
         }
         """.trimIndent()
+
+    fun initPatternDescribeSpec() =
+        """
+        class SampleInitDescribeSpec : DescribeSpec() {
+            init {
+                describe("a feature") {
+                    it("should work") {
+                        val result = 1 + 1
+                    }
+                }
+            }
+        }
+        """.trimIndent()
+
+    fun initPatternBehaviorSpec() =
+        """
+        class SampleInitBehaviorSpec : BehaviorSpec() {
+            init {
+                given("a scenario") {
+                    `when`("something happens") {
+                        then("it should work") {
+                            val result = 1 + 1
+                        }
+                    }
+                }
+            }
+        }
+        """.trimIndent()
 }

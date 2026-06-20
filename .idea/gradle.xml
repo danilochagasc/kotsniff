@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/kotsniff-analyzer" />
+            <option value="$PROJECT_DIR$/kotsniff-cli" />
             <option value="$PROJECT_DIR$/kotsniff-core" />
           </set>
         </option>

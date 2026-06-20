@@ -26,7 +26,7 @@ class IgnoredTestDetectorTest :
                 val results = engine.analyze(ignoredStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
                 results.first().smellType shouldBe IGNORED_TEST
-                results.first().codeSnippet.startsWith("!\"ignored string test\"") shouldBe true
+                results.first().codeSnippet.startsWith("\"!ignored string test\"") shouldBe true
             }
 
             it("should detect xtest in FunSpec") {
