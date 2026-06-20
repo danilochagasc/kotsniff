@@ -2,7 +2,6 @@ package br.com.kotsniff.analyzer.detectors
 
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
-import br.com.kotsniff.core.enums.TestSmell
 import br.com.kotsniff.core.enums.TestSmell.CONDITIONAL_TEST_LOGIC
 import br.com.kotsniff.core.models.DetectionResult
 import org.jetbrains.kotlin.psi.KtIfExpression
