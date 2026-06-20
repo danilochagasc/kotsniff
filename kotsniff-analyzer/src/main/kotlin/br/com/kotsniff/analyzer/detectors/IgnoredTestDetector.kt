@@ -22,11 +22,10 @@ class IgnoredTestDetector : TestSmellDetector {
     ): List<DetectionResult> {
         val expr = testBlock.originalExpression
 
-        // 1. Class-level annotations (@Ignored, @Disabled, @Ignore)
         val parentClass = expr.getParentOfType<KtClassOrObject>(true)
         val classAnnotation =
-            parentClass?.annotationEntries?.firstOrNull {
-                it.shortName?.asString() in IGNORE_ANNOTATIONS
+            parentClass?.annotationEntries?.firstOrNull { annotation ->
+                annotation.shortName?.asString() in IGNORE_ANNOTATIONS
             }
 
         if (classAnnotation != null) {

@@ -63,5 +63,17 @@ class IgnoredTestDetectorTest :
                 results.first().smellType shouldBe IGNORED_TEST
                 results.first().codeSnippet shouldBe "@Ignored"
             }
+
+            it("should detect class level ignore annotations with init blocks") {
+                val results =
+                    engine.analyze(
+                        IgnoredTestDetectorFixture.classIgnoredSpecWithInit(),
+                        IgnoredTestDetectorFixture.FILE_PATH_CLASS_IGNORED_INIT,
+                    )
+                results shouldHaveSize 1
+                results.first().smellType shouldBe IGNORED_TEST
+                results.first().codeSnippet shouldBe "@Ignored"
+            }
+
         }
     })

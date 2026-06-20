@@ -4,10 +4,12 @@ import br.com.kotsniff.analyzer.KotSniffEngine
 import br.com.kotsniff.analyzer.detectors.ConditionalTestLogicDetector
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.FILE_PATH_BEHAVIOR_SPEC
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.FILE_PATH_DESCRIBE_SPEC
+import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.FILE_PATH_DESCRIBE_SPEC_INIT
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.FILE_PATH_FUN_SPEC
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.FILE_PATH_STRING_SPEC
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.conditionalBehaviorSpec
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.conditionalDescribeSpec
+import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.conditionalDescribeSpecInit
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.conditionalFunSpec
 import br.com.kotsniff.analyzer.detectors.conditional.ConditionalTestLogicDetectorFixture.conditionalStringSpec
 import br.com.kotsniff.core.enums.TestSmell.CONDITIONAL_TEST_LOGIC
@@ -46,6 +48,13 @@ class ConditionalTestLogicDetectorTest :
                 results shouldHaveSize 1
                 results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("when (true)") shouldBe true
+            }
+
+            it("should detect if in DescribeSpec with init block") {
+                val results = engine.analyze(conditionalDescribeSpecInit(), FILE_PATH_DESCRIBE_SPEC_INIT)
+                results shouldHaveSize 1
+                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().codeSnippet.startsWith("if (true)") shouldBe true
             }
         }
     })

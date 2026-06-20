@@ -26,7 +26,8 @@ class KotSniffEngine(
         code: String,
         filePath: String,
     ): List<DetectionResult> {
-        val ktFile = KotlinParser.parse(code)
+        val normalizedCode = code.replace("\r\n", "\n")
+        val ktFile = KotlinParser.parse(normalizedCode)
         val extractor = KotestBlockExtractor()
 
         // Extract test blocks

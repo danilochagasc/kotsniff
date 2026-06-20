@@ -5,6 +5,8 @@ object IgnoredTestDetectorFixture {
     const val FILE_PATH_FUN_SPEC = "SampleIgnoredFunSpec.kt"
     const val FILE_PATH_BEHAVIOR_SPEC = "SampleIgnoredBehaviorSpec.kt"
     const val FILE_PATH_DESCRIBE_SPEC = "SampleIgnoredDescribeSpec.kt"
+    const val FILE_PATH_CLASS_IGNORED = "SampleClassIgnoredSpec.kt"
+    const val FILE_PATH_CLASS_IGNORED_INIT = "SampleClassIgnoredInitSpec.kt"
 
     fun ignoredStringSpec() =
         """
@@ -67,8 +69,6 @@ object IgnoredTestDetectorFixture {
         })
         """.trimIndent()
 
-    const val FILE_PATH_CLASS_IGNORED = "SampleClassIgnoredSpec.kt"
-
     fun classIgnoredSpec() =
         """
         import io.kotest.core.annotation.Ignored
@@ -82,5 +82,21 @@ object IgnoredTestDetectorFixture {
                 val result = 2 + 2
             }
         })
+        """.trimIndent()
+
+    fun classIgnoredSpecWithInit() =
+        """
+        import io.kotest.core.annotation.Ignored
+        
+        @Ignored
+        class SampleClassIgnoredInitSpec : DescribeSpec() {
+            init {
+                describe("A suite") {
+                    it("A test") {
+                        val result = 1 + 1
+                    }
+                }
+            }
+        }
         """.trimIndent()
 }

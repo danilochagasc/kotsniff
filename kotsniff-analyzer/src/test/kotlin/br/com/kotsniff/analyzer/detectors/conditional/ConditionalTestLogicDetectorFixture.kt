@@ -5,6 +5,7 @@ object ConditionalTestLogicDetectorFixture {
     const val FILE_PATH_FUN_SPEC = "SampleConditionalFunSpec.kt"
     const val FILE_PATH_BEHAVIOR_SPEC = "SampleConditionalBehaviorSpec.kt"
     const val FILE_PATH_DESCRIBE_SPEC = "SampleConditionalDescribeSpec.kt"
+    const val FILE_PATH_DESCRIBE_SPEC_INIT = "SampleConditionalDescribeSpecInit.kt"
 
     fun conditionalStringSpec() =
         """
@@ -52,5 +53,20 @@ object ConditionalTestLogicDetectorFixture {
                 }
             }
         })
+        """.trimIndent()
+
+    fun conditionalDescribeSpecInit() =
+        """
+        class SampleConditionalDescribeSpecInit : DescribeSpec() {
+            init {
+                describe("a conditional test") {
+                    it("should be detected") {
+                        if (true) {
+                            println("yes")
+                        }
+                    }
+                }
+            }
+        }
         """.trimIndent()
 }
