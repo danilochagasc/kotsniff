@@ -13,4 +13,5 @@ data class KotestBlock(
     val name: String,
     val body: KtLambdaExpression,
     val originalExpression: KtCallExpression,
+    val isTerminal: Boolean,
 )

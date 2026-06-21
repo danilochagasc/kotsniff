@@ -13,7 +13,9 @@ enum class TestSmell(
 ) {
     IGNORED_TEST("Tests that are disabled or skipped."),
     SLEEPY_TEST("Tests that use explicit thread sleeps, e.g., Thread.sleep."),
-    CONDITIONAL_TEST_LOGIC("Tests containing if/else or when blocks, which indicates the test might have multiple flows.");
+    CONDITIONAL_TEST_LOGIC("Tests containing if/else or when blocks, which indicates the test might have multiple flows."),
+    EXCEPTION_HANDLING("Test methods should not use try/catch blocks. The test framework should handle exceptions."),
+    UNKNOWN_TEST("A test block that executes code but contains NO assertions.");
 
     /**
      * A pretty-printed name for the smell (e.g. IGNORED_TEST -> "Ignored Test").

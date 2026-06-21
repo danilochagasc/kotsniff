@@ -1,9 +1,11 @@
 package br.com.kotsniff.analyzer
 
 import br.com.kotsniff.analyzer.detectors.ConditionalTestLogicDetector
+import br.com.kotsniff.analyzer.detectors.ExceptionHandlingDetector
 import br.com.kotsniff.analyzer.detectors.IgnoredTestDetector
 import br.com.kotsniff.analyzer.detectors.SleepyTestDetector
 import br.com.kotsniff.analyzer.detectors.TestSmellDetector
+import br.com.kotsniff.analyzer.detectors.UnknownTestDetector
 import br.com.kotsniff.analyzer.parser.KotlinParser
 import br.com.kotsniff.analyzer.visitors.KotestBlockExtractor
 import br.com.kotsniff.core.models.DetectionResult
@@ -56,6 +58,8 @@ class KotSniffEngine(
                     SleepyTestDetector(),
                     ConditionalTestLogicDetector(),
                     IgnoredTestDetector(),
+                    ExceptionHandlingDetector(),
+                    UnknownTestDetector(),
                 ),
             )
     }

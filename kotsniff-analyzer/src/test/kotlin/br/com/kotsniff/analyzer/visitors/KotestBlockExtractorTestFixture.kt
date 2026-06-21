@@ -85,4 +85,37 @@ object KotestBlockExtractorTestFixture {
             }
         }
         """.trimIndent()
+
+    fun initPatternFunSpec() =
+        """
+        class SampleInitFunSpec : FunSpec() {
+            init {
+                test("works inside init") {
+                    val result = 1 + 1
+                }
+            }
+        }
+        """.trimIndent()
+
+    fun featureSpec() =
+        """
+        class SampleFeatureSpec : FeatureSpec({
+            feature("a calculator") {
+                scenario("addition works") {
+                    val result = 1 + 1
+                }
+            }
+        })
+        """.trimIndent()
+
+    fun expectSpec() =
+        """
+        class SampleExpectSpec : ExpectSpec({
+            context("a calculator") {
+                expect("addition works") {
+                    val result = 1 + 1
+                }
+            }
+        })
+        """.trimIndent()
 }

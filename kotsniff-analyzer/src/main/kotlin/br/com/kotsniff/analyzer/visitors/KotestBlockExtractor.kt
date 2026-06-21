@@ -7,6 +7,8 @@ import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
+import br.com.kotsniff.analyzer.utils.KotestDslKeywords
+
 /**
  * A PSI tree visitor that identifies Kotest test blocks across multiple Spec styles.
  *
@@ -18,6 +20,9 @@ import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
  * - **FunSpec**: `test("name") { body }`, `context("name") { body }`
  * - **BehaviorSpec**: `given/when/then("name") { body }`
  * - **DescribeSpec**: `describe/context/it("name") { body }`
+ * - **FeatureSpec**: `feature/scenario("name") { body }`
+ * - **ShouldSpec**: `should("name") { body }`
+ * - **ExpectSpec**: `expect("name") { body }`
  */
 class KotestBlockExtractor : KtTreeVisitorVoid() {
     private val _foundTests = mutableListOf<KotestBlock>()
@@ -59,14 +64,16 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
             // StringSpec pattern: "test name" { body }
             is KtStringTemplateExpression -> {
                 val name = callee.entries.joinToString("") { it.text }
-                _foundTests.add(KotestBlock(name, lambda, expression))
+                _foundTests.add(KotestBlock(name, lambda, expression, isTerminal = true))
             }
 
             // Named DSL functions: test("name") { }, given("name") { }, etc.
             is KtNameReferenceExpression -> {
-                if (callee.getReferencedName() in KOTEST_DSL_NAMES) {
-                    val name = extractFirstStringArgument(expression) ?: callee.getReferencedName()
-                    _foundTests.add(KotestBlock(name, lambda, expression))
+                val funcName = callee.getReferencedName()
+                if (funcName in KotestDslKeywords.ALL_DSL_NAMES) {
+                    val name = extractFirstStringArgument(expression) ?: funcName
+                    val isTerminal = funcName in KotestDslKeywords.ALL_TERMINALS
+                    _foundTests.add(KotestBlock(name, lambda, expression, isTerminal))
                 }
             }
         }
@@ -75,36 +82,5 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
     private fun extractFirstStringArgument(expression: KtCallExpression): String? {
         val firstArg = expression.valueArguments.firstOrNull()?.getArgumentExpression()
         return (firstArg as? KtStringTemplateExpression)?.entries?.joinToString("") { it.text }
-    }
-
-    companion object {
-        /** Known Kotest DSL function names that define test blocks or contexts. */
-        private val KOTEST_DSL_NAMES =
-            setOf(
-                // FunSpec
-                "test",
-                "xtest",
-                // BehaviorSpec
-                "given",
-                "Given",
-                "xgiven",
-                "when",
-                "When",
-                "xwhen",
-                "then",
-                "Then",
-                "xthen",
-                // DescribeSpec
-                "describe",
-                "xdescribe",
-                "it",
-                "xit",
-                // Shared
-                "context",
-                "xcontext",
-                // ShouldSpec
-                "should",
-                "xshould",
-            )
     }
 }

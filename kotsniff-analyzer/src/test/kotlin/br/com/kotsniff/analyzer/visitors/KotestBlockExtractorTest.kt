@@ -1,8 +1,11 @@
 package br.com.kotsniff.analyzer.visitors
 
 import br.com.kotsniff.analyzer.parser.KotlinParser
+import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.expectSpec
+import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.featureSpec
 import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.initPatternBehaviorSpec
 import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.initPatternDescribeSpec
+import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.initPatternFunSpec
 import br.com.kotsniff.analyzer.visitors.KotestBlockExtractorTestFixture.stringSpec
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -94,6 +97,38 @@ class KotestBlockExtractorTest :
                     tests[0].name shouldBe "a scenario"
                     tests[1].name shouldBe "something happens"
                     tests[2].name shouldBe "it should work"
+                }
+
+                it("should find FunSpec tests defined inside an init block") {
+                    val ktFile = KotlinParser.parse(initPatternFunSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 1
+                    tests[0].name shouldBe "works inside init"
+                }
+
+                it("should find FeatureSpec tests") {
+                    val ktFile = KotlinParser.parse(featureSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 2
+                    tests[0].name shouldBe "a calculator"
+                    tests[1].name shouldBe "addition works"
+                }
+
+                it("should find ExpectSpec tests") {
+                    val ktFile = KotlinParser.parse(expectSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 2
+                    tests[0].name shouldBe "a calculator"
+                    tests[1].name shouldBe "addition works"
                 }
             }
 
