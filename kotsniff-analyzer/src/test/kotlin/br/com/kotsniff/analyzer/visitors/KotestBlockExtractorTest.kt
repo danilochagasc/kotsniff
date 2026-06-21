@@ -130,6 +130,41 @@ class KotestBlockExtractorTest :
                     tests[0].name shouldBe "a calculator"
                     tests[1].name shouldBe "addition works"
                 }
+
+                it("should find FreeSpec tests") {
+                    val ktFile = KotlinParser.parse(KotestBlockExtractorTestFixture.freeSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 2
+                    tests[0].name shouldBe "free spec container"
+                    tests[1].name shouldBe "free spec leaf"
+                }
+
+                it("should find WordSpec tests") {
+                    val ktFile = KotlinParser.parse(KotestBlockExtractorTestFixture.wordSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 5
+                    tests[0].name shouldBe "word spec container"
+                    tests[1].name shouldBe "word spec leaf"
+                    tests[2].name shouldBe "word spec container When"
+                    tests[3].name shouldBe "word spec container should"
+                    tests[4].name shouldBe "word spec leaf nested"
+                }
+
+                it("should find AnnotationSpec tests") {
+                    val ktFile = KotlinParser.parse(KotestBlockExtractorTestFixture.annotationSpec())
+                    val visitor = KotestBlockExtractor()
+                    ktFile.accept(visitor)
+
+                    val tests = visitor.foundTests
+                    tests.size shouldBe 1
+                    tests[0].name shouldBe "annotation spec leaf"
+                }
             }
 
             context("when parsing a class that does not extend Spec") {

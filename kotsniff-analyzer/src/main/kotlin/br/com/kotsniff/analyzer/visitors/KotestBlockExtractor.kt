@@ -1,7 +1,9 @@
 package br.com.kotsniff.analyzer.visitors
 
+import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
@@ -23,6 +25,9 @@ import br.com.kotsniff.analyzer.utils.KotestDslKeywords
  * - **FeatureSpec**: `feature/scenario("name") { body }`
  * - **ShouldSpec**: `should("name") { body }`
  * - **ExpectSpec**: `expect("name") { body }`
+ * - **FreeSpec**: `"name" - { body }`
+ * - **WordSpec**: `"name" should { body }`, `"name" When { body }`
+ * - **AnnotationSpec**: Methods annotated with `@Test`
  */
 class KotestBlockExtractor : KtTreeVisitorVoid() {
     private val _foundTests = mutableListOf<KotestBlock>()
@@ -52,6 +57,45 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
             tryExtractTestBlock(expression)
         }
         super.visitCallExpression(expression)
+    }
+
+    override fun visitBinaryExpression(expression: KtBinaryExpression) {
+        if (specDepth > 0) {
+            tryExtractFromBinaryExpression(expression)
+        }
+        super.visitBinaryExpression(expression)
+    }
+
+    override fun visitNamedFunction(function: KtNamedFunction) {
+        if (specDepth > 0) {
+            tryExtractFromNamedFunction(function)
+        }
+        super.visitNamedFunction(function)
+    }
+
+    private fun tryExtractFromNamedFunction(function: KtNamedFunction) {
+        val hasTestAnnotation = function.annotationEntries.any { it.shortName?.asString() == "Test" }
+        if (hasTestAnnotation) {
+            val name = function.name ?: return
+            val body = function.bodyExpression ?: return
+            _foundTests.add(KotestBlock(name, body, function, isTerminal = true))
+        }
+    }
+
+    private fun tryExtractFromBinaryExpression(expression: KtBinaryExpression) {
+        val operation = expression.operationReference.text
+        if (operation in KotestDslKeywords.ALL_DSL_NAMES) {
+            val left = expression.left?.text?.removeSurrounding("\"") ?: return
+            val right = expression.right ?: return
+            
+            // Kotest DSL blocks always have a lambda on the right side
+            if (right !is org.jetbrains.kotlin.psi.KtLambdaExpression) return
+            
+            // In FreeSpec and WordSpec, the right side is the lambda containing nested tests
+            // e.g. "container" - { ... }
+            val isTerminal = operation in KotestDslKeywords.ALL_TERMINALS
+            _foundTests.add(KotestBlock(left, right, expression, isTerminal))
+        }
     }
 
     private fun tryExtractTestBlock(expression: KtCallExpression) {

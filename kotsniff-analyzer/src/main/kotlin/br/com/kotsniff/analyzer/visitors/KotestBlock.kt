@@ -1,6 +1,7 @@
 package br.com.kotsniff.analyzer.visitors
 
 import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtLambdaExpression
 
 /**
@@ -11,7 +12,7 @@ import org.jetbrains.kotlin.psi.KtLambdaExpression
  */
 data class KotestBlock(
     val name: String,
-    val body: KtLambdaExpression,
-    val originalExpression: KtCallExpression,
+    val body: KtElement,
+    val originalExpression: KtElement,
     val isTerminal: Boolean,
 )

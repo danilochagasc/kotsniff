@@ -118,4 +118,43 @@ object KotestBlockExtractorTestFixture {
             }
         })
         """.trimIndent()
+
+    fun freeSpec() =
+        """
+        class SampleFreeSpec : FreeSpec({
+            "free spec container" - {
+                "free spec leaf" {
+                    val result = 1 + 1
+                }
+            }
+        })
+        """.trimIndent()
+
+    fun wordSpec() =
+        """
+        class SampleWordSpec : WordSpec({
+            "word spec container" should {
+                "word spec leaf" {
+                    val result = 1 + 1
+                }
+            }
+            "word spec container When" When {
+                "word spec container should" should {
+                    "word spec leaf nested" {
+                        val result = 1 + 1
+                    }
+                }
+            }
+        })
+        """.trimIndent()
+
+    fun annotationSpec() =
+        """
+        class SampleAnnotationSpec : AnnotationSpec() {
+            @Test
+            fun `annotation spec leaf`() {
+                val result = 1 + 1
+            }
+        }
+        """.trimIndent()
 }

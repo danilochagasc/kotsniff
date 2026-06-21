@@ -50,7 +50,7 @@ class IgnoredTestDetector : TestSmellDetector {
         }
 
         // 3. X-prefix DSL functions (xtest, xdescribe, xit, etc.)
-        val callee = expr.calleeExpression
+        val callee = (expr as? org.jetbrains.kotlin.psi.KtCallExpression)?.calleeExpression
         if (callee is KtNameReferenceExpression && callee.getReferencedName().startsWith("x")) {
             return listOf(
                 DetectionResult(
@@ -59,6 +59,20 @@ class IgnoredTestDetector : TestSmellDetector {
                     codeSnippet = expr.text,
                 ),
             )
+        }
+        
+        // 4. Function-level annotations (for AnnotationSpec)
+        if (expr is org.jetbrains.kotlin.psi.KtNamedFunction) {
+            val hasIgnoreAnnotation = expr.annotationEntries.any { it.shortName?.asString() in IGNORE_ANNOTATIONS }
+            if (hasIgnoreAnnotation) {
+                return listOf(
+                    DetectionResult(
+                        smellType = IGNORED_TEST,
+                        location = expr.toCodeLocation(filePath),
+                        codeSnippet = expr.text,
+                    ),
+                )
+            }
         }
 
         return emptyList()
