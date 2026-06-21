@@ -2,6 +2,7 @@ package br.com.kotsniff.cli.commands
 
 import br.com.kotsniff.analyzer.KotSniffEngine
 import br.com.kotsniff.cli.models.Report
+import br.com.kotsniff.cli.report.HtmlReportGenerator
 import br.com.kotsniff.cli.report.JsonReportGenerator
 import br.com.kotsniff.cli.report.MarkdownReportGenerator
 import br.com.kotsniff.cli.report.TextReportGenerator
@@ -29,7 +30,7 @@ class AnalyzeCommand :
         help = "A Kotlin test smells detector for the Kotest framework.",
     ) {
     private val path by option("-p", "--path", help = "Target directory to analyze").default(".")
-    private val format by option("-f", "--format", help = "Output format").choice("markdown", "json", "text").default("markdown")
+    private val format by option("-f", "--format", help = "Output format").choice("markdown", "json", "text", "html").default("markdown")
     private val output by option("-o", "--output", help = "Output file path")
     private val showDetails by option("--show-details", help = "Print individual test smells to the terminal").flag(default = false)
 
@@ -81,9 +82,10 @@ class AnalyzeCommand :
             when (format) {
                 "markdown" -> MarkdownReportGenerator()
                 "text" -> TextReportGenerator()
+                "html" -> HtmlReportGenerator()
                 else -> JsonReportGenerator()
             }
-        generator.generate(report, outputFile)
+        generator.generate(report, outputFile, targetDir)
 
         printer.printReportLocation(outputFile.absolutePath)
         printer.printFailedFilesWarning(failedFiles)
@@ -101,6 +103,7 @@ class AnalyzeCommand :
                 when (format) {
                     "markdown" -> "md"
                     "json" -> "json"
+                    "html" -> "html"
                     else -> "txt"
                 }
             File(targetDir, "kotsniff-report.$extension")

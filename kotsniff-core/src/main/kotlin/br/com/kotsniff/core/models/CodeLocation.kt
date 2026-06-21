@@ -8,10 +8,12 @@ import kotlinx.serialization.Serializable
  * @property filePath The path to the source file.
  * @property line The 1-based line number.
  * @property column The 1-based column number.
+ * @property endLine The 1-based ending line number.
  */
 @Serializable
 data class CodeLocation(
     val filePath: String,
     val line: Int,
     val column: Int,
+    val endLine: Int,
 )

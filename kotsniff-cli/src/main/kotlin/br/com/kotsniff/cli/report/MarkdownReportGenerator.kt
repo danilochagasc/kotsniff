@@ -11,6 +11,7 @@ class MarkdownReportGenerator : ReportGenerator {
     override fun generate(
         report: Report,
         outputFile: File,
+        targetDir: File,
     ) {
         val content =
             buildString {

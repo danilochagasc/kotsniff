@@ -12,6 +12,7 @@ class JsonReportGenerator : ReportGenerator {
     override fun generate(
         report: Report,
         outputFile: File,
+        targetDir: File,
     ) {
         val json = Json { prettyPrint = true }
         outputFile.writeText(json.encodeToString(report))

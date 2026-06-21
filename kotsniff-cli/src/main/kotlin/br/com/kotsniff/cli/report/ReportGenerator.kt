@@ -10,5 +10,6 @@ interface ReportGenerator {
     fun generate(
         report: Report,
         outputFile: File,
+        targetDir: File,
     )
 }
