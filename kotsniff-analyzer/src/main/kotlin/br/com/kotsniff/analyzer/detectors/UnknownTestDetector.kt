@@ -1,5 +1,6 @@
 package br.com.kotsniff.analyzer.detectors
 
+import br.com.kotsniff.analyzer.utils.isAssertion
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell
@@ -26,7 +27,7 @@ class UnknownTestDetector : TestSmellDetector {
                     val callee = expression.calleeExpression
                     if (callee is KtNameReferenceExpression) {
                         val name = callee.getReferencedName()
-                        if (name.startsWith("assert") || name.startsWith("should") || name.startsWith("expect")) {
+                        if (name.isAssertion()) {
                             assertionCount++
                         }
                     }
@@ -35,7 +36,7 @@ class UnknownTestDetector : TestSmellDetector {
                 override fun visitBinaryExpression(expression: KtBinaryExpression) {
                     super.visitBinaryExpression(expression)
                     val operation = expression.operationReference.text
-                    if (operation.startsWith("should")) {
+                    if (operation.isAssertion()) {
                         assertionCount++
                     }
                 }

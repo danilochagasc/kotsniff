@@ -36,4 +36,6 @@ object KotestDslKeywords {
             ANNOTATION_SPEC_TERMINALS
 
     val ALL_DSL_NAMES = ALL_CONTAINERS + ALL_TERMINALS
+
+    val ASSERTION_PREFIXES = setOf("assert", "should", "expect")
 }

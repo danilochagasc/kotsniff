@@ -15,7 +15,9 @@ enum class TestSmell(
     SLEEPY_TEST("Tests that use explicit thread sleeps, e.g., Thread.sleep."),
     CONDITIONAL_TEST_LOGIC("Tests containing if/else or when blocks, which indicates the test might have multiple flows."),
     EXCEPTION_HANDLING("Test methods should not use try/catch blocks. The test framework should handle exceptions."),
-    UNKNOWN_TEST("A test block that executes code but contains NO assertions.");
+    UNKNOWN_TEST("A test block that executes code but contains NO assertions."),
+    DUPLICATE_ASSERT("Testing the exact same condition multiple times in the same test block."),
+    MAGIC_NUMBER_TEST("Using arbitrary numeric literals in assertions without explaining their meaning via constants.");
 
     /**
      * A pretty-printed name for the smell (e.g. IGNORED_TEST -> "Ignored Test").
