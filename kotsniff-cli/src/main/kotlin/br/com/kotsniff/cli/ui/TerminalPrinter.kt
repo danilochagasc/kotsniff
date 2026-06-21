@@ -13,32 +13,32 @@ class TerminalPrinter(
     private val echo: (String, Boolean) -> Unit,
 ) {
     fun printStart() {
-        echo("$BLUE🔍 Starting KotSniff Analysis...$RESET", false)
+        echo("$BLUE[*]$RESET Starting KotSniff Analysis...", false)
     }
 
     fun printError(message: String) {
-        echo("$RED❌ Error: $message$RESET", true)
+        echo("$RED[ERROR]$RESET $message", true)
     }
 
     fun printScanSummary(
         totalFiles: Int,
         timeTakenMs: Long,
     ) {
-        echo("$GREEN✅ Scanned $totalFiles Kotlin files in ${timeTakenMs}ms$RESET", false)
+        echo("$GREEN[OK]$RESET Scanned $totalFiles Kotlin files in ${timeTakenMs}ms", false)
     }
 
     fun printResults(results: List<DetectionResult>) {
         if (results.isEmpty()) {
-            echo("$GREEN🎉 Awesome! No test smells found!$RESET", false)
+            echo("$GREEN[SUCCESS]$RESET Awesome! No test smells found!", false)
             return
         }
 
-        echo("$YELLOW⚠️  Found ${results.size} test smells:$RESET", false)
+        echo("$YELLOW[WARN]$RESET Found ${results.size} test smells:", false)
 
         results
             .groupBy { it.location.filePath }
             .forEach { (file, smells) ->
-                echo("\n$CYAN📁 $file$RESET", false)
+                echo("\n$CYAN->$RESET $file", false)
                 smells.forEach { smell ->
                     echo("  - $RED[${smell.smellType}]$RESET line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}", false)
                 }
@@ -46,7 +46,16 @@ class TerminalPrinter(
     }
 
     fun printReportLocation(path: String) {
-        echo("\n$GREEN📄 Report generated at: $path$RESET", false)
+        echo("\n$GREEN[INFO]$RESET Report generated at: $path", false)
+    }
+
+    fun printFailedFilesWarning(failedFiles: List<String>) {
+        if (failedFiles.isEmpty()) return
+
+        echo("\n$YELLOW[WARN]$RESET Could not parse ${failedFiles.size} file(s) due to syntax errors:", false)
+        failedFiles.forEach { file ->
+            echo("  - $file", false)
+        }
     }
 
     companion object {

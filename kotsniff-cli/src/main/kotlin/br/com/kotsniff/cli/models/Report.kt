@@ -9,4 +9,5 @@ data class Report(
     val timeTakenMs: Long,
     val smellsFound: Int,
     val smells: List<DetectionResult>,
+    val failedFiles: List<String> = emptyList(),
 )

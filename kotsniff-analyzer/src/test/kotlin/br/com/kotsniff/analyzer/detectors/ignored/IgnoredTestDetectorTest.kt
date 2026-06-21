@@ -74,6 +74,5 @@ class IgnoredTestDetectorTest :
                 results.first().smellType shouldBe IGNORED_TEST
                 results.first().codeSnippet shouldBe "@Ignored"
             }
-
         }
     })

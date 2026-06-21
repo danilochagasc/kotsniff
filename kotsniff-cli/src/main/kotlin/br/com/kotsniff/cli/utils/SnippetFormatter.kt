@@ -2,9 +2,9 @@ package br.com.kotsniff.cli.utils
 
 /**
  * Formats a code snippet extracted from Kotlin PSI so that its indentation is uniform.
- * 
- * PSI's `expr.text` strips the leading whitespace of the first line because the whitespace 
- * is considered a separate PSI element. This function restores the visual alignment by 
+ *
+ * PSI's `expr.text` strips the leading whitespace of the first line because the whitespace
+ * is considered a separate PSI element. This function restores the visual alignment by
  * calculating the baseline indentation from the subsequent lines.
  */
 fun String.formatCodeSnippet(): String {

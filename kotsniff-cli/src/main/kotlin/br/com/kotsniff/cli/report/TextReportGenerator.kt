@@ -34,6 +34,13 @@ class TextReportGenerator : ReportGenerator {
                             appendLine("  - [${smell.smellType}] line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}")
                         }
                     }
+
+                if (report.failedFiles.isNotEmpty()) {
+                    appendLine("\nFailed to Parse:")
+                    report.failedFiles.forEach { file ->
+                        appendLine("  - $file")
+                    }
+                }
             }
         outputFile.writeText(content)
     }

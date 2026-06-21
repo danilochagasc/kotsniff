@@ -11,6 +11,7 @@ import br.com.kotsniff.core.models.DetectionResult
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import java.io.File
@@ -24,12 +25,13 @@ import kotlin.system.measureTimeMillis
  */
 class AnalyzeCommand :
     CliktCommand(
-        name = "kotsniff-cli",
-        help = "Analyzes Kotest files for test smells",
+        name = "kotsniff",
+        help = "A Kotlin test smells detector for the Kotest framework.",
     ) {
     private val path by option("-p", "--path", help = "Target directory to analyze").default(".")
     private val format by option("-f", "--format", help = "Output format").choice("markdown", "json", "text").default("markdown")
     private val output by option("-o", "--output", help = "Output file path")
+    private val showDetails by option("--show-details", help = "Print individual test smells to the terminal").flag(default = false)
 
     override fun run() {
         val printer = TerminalPrinter { msg, err -> echo(msg, err = err) }
@@ -45,17 +47,24 @@ class AnalyzeCommand :
         val runner = KotSniffRunner(engine)
 
         var totalFiles = 0
-        val results: List<DetectionResult>
+        var results = emptyList<DetectionResult>()
+        var failedFiles = emptyList<String>()
 
         val timeTakenMs =
             measureTimeMillis {
-                val (filesScanned, smells) = runner.scanDirectory(targetDir)
-                totalFiles = filesScanned
-                results = smells
+                val summary = runner.scanDirectory(targetDir)
+                totalFiles = summary.totalFilesScanned
+                results = summary.smells
+                failedFiles = summary.failedFiles
             }
 
         printer.printScanSummary(totalFiles, timeTakenMs)
-        printer.printResults(results)
+
+        if (showDetails) {
+            printer.printResults(results)
+        } else if (results.isNotEmpty()) {
+            printer.printError("Found ${results.size} test smells! Run with --show-details to see them in the terminal.")
+        }
 
         val outputFile = resolveOutputFile(targetDir)
 
@@ -65,6 +74,7 @@ class AnalyzeCommand :
                 timeTakenMs = timeTakenMs,
                 smellsFound = results.size,
                 smells = results,
+                failedFiles = failedFiles,
             )
 
         val generator =
@@ -76,6 +86,7 @@ class AnalyzeCommand :
         generator.generate(report, outputFile)
 
         printer.printReportLocation(outputFile.absolutePath)
+        printer.printFailedFilesWarning(failedFiles)
 
         if (results.isNotEmpty()) {
             throw ProgramResult(1)

@@ -1,6 +1,7 @@
 package br.com.kotsniff.cli.runner
 
 import br.com.kotsniff.analyzer.KotSniffEngine
+import br.com.kotsniff.cli.models.ScanSummary
 import br.com.kotsniff.core.models.DetectionResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -13,28 +14,35 @@ class KotSniffRunner(
 ) {
     /**
      * Scans a directory for Kotlin files and analyzes them concurrently.
-     * @return A Pair containing the total number of files scanned and a flat list of detection results.
+     * @return A [ScanSummary] containing the results and any failed files.
      */
-    fun scanDirectory(rootDir: File): Pair<Int, List<DetectionResult>> {
+    fun scanDirectory(rootDir: File): ScanSummary {
         val ktFiles = rootDir.walkTopDown().filter { it.extension == "kt" }.toList()
 
-        val results =
+        val resultsAndFailures =
             runBlocking(Dispatchers.Default) {
                 val deferredResults =
                     ktFiles.map { file ->
                         async {
                             val relativePath = file.relativeTo(rootDir).invariantSeparatorsPath
                             try {
-                                engine.analyze(file.readText(), relativePath)
+                                val fileSmells = engine.analyze(file.readText(), relativePath)
+                                Pair(fileSmells, null)
                             } catch (e: Exception) {
-                                System.err.println("Warning: Failed to parse file ${relativePath} - ${e.message}")
-                                emptyList<DetectionResult>()
+                                Pair(emptyList<DetectionResult>(), relativePath)
                             }
                         }
                     }
-                deferredResults.awaitAll().flatten()
+                deferredResults.awaitAll()
             }
 
-        return Pair(ktFiles.size, results)
+        val results = resultsAndFailures.flatMap { it.first }
+        val failedFiles = resultsAndFailures.mapNotNull { it.second }
+
+        return ScanSummary(
+            totalFilesScanned = ktFiles.size,
+            smells = results,
+            failedFiles = failedFiles,
+        )
     }
 }
