@@ -10,6 +10,7 @@ import br.com.kotsniff.analyzer.detectors.unknown.UnknownTestDetectorFixture.unk
 import br.com.kotsniff.analyzer.detectors.unknown.UnknownTestDetectorFixture.unknownTestDescribeSpec
 import br.com.kotsniff.analyzer.detectors.unknown.UnknownTestDetectorFixture.unknownTestFunSpec
 import br.com.kotsniff.analyzer.detectors.unknown.UnknownTestDetectorFixture.unknownTestStringSpec
+import br.com.kotsniff.analyzer.detectors.unknown.UnknownTestDetectorFixture.validTestWithMockkVerification
 import br.com.kotsniff.core.enums.TestSmell.UNKNOWN_TEST
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -42,6 +43,11 @@ class UnknownTestDetectorTest :
                 val results = engine.analyze(unknownTestDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
                 results shouldHaveSize 1
                 results.first().smellType shouldBe UNKNOWN_TEST
+            }
+
+            it("should NOT detect unknown test when using mock verification like coVerify") {
+                val results = engine.analyze(validTestWithMockkVerification(), "SampleMockkSpec.kt")
+                results shouldHaveSize 0
             }
         }
     })

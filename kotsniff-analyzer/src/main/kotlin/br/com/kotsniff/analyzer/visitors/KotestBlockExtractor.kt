@@ -1,12 +1,11 @@
 package br.com.kotsniff.analyzer.visitors
 
-import br.com.kotsniff.analyzer.utils.KotestDslKeywords
+import br.com.kotsniff.analyzer.utils.TestDslKeywords
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
@@ -83,7 +82,7 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
 
     private fun tryExtractFromBinaryExpression(expression: KtBinaryExpression) {
         val operation = expression.operationReference.text
-        if (operation in KotestDslKeywords.ALL_DSL_NAMES) {
+        if (operation in TestDslKeywords.ALL_DSL_NAMES) {
             val left = expression.left?.text?.removeSurrounding("\"") ?: return
             val right = expression.right ?: return
 
@@ -92,7 +91,7 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
 
             // In FreeSpec and WordSpec, the right side is the lambda containing nested tests
             // e.g. "container" - { ... }
-            val isTerminal = operation in KotestDslKeywords.ALL_TERMINALS
+            val isTerminal = operation in TestDslKeywords.ALL_TERMINALS
             _foundTests.add(KotestBlock(left, right, expression, isTerminal))
         }
     }
@@ -113,9 +112,9 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
             // Named DSL functions: test("name") { }, given("name") { }, etc.
             is KtNameReferenceExpression -> {
                 val funcName = callee.getReferencedName()
-                if (funcName in KotestDslKeywords.ALL_DSL_NAMES) {
+                if (funcName in TestDslKeywords.ALL_DSL_NAMES) {
                     val name = extractFirstStringArgument(expression) ?: funcName
-                    val isTerminal = funcName in KotestDslKeywords.ALL_TERMINALS
+                    val isTerminal = funcName in TestDslKeywords.ALL_TERMINALS
                     _foundTests.add(KotestBlock(name, lambda, expression, isTerminal))
                 }
             }

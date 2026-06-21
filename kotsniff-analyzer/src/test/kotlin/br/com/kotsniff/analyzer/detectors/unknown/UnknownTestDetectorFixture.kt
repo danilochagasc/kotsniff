@@ -55,4 +55,27 @@ object UnknownTestDetectorFixture {
             }
         })
         """.trimIndent()
+
+    fun validTestWithMockkVerification() =
+        """
+        package br.com.kotsniff.analyzer.detectors.unknown
+
+        import io.kotest.core.spec.style.StringSpec
+        import io.mockk.coEvery
+        import io.mockk.coVerify
+        import io.mockk.mockk
+
+        class SampleMockkSpec : StringSpec({
+            "saving a user should trigger repository" {
+                val repository = mockk<UserRepository>()
+                val service = UserService(repository)
+                
+                coEvery { repository.save(any()) } returns Unit
+                
+                service.saveUser("Danilo")
+                
+                coVerify { repository.save(any()) }
+            }
+        })
+        """.trimIndent()
 }
