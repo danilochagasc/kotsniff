@@ -1,5 +1,6 @@
 package br.com.kotsniff.analyzer
 
+import br.com.kotsniff.analyzer.detectors.AssertionRouletteDetector
 import br.com.kotsniff.analyzer.detectors.ConditionalTestLogicDetector
 import br.com.kotsniff.analyzer.detectors.DuplicateAssertDetector
 import br.com.kotsniff.analyzer.detectors.ExceptionHandlingDetector
@@ -54,17 +55,19 @@ class KotSniffEngine(
         /**
          * Creates an engine with the default set of Test Smell Detectors.
          */
-        fun createDefault(): KotSniffEngine =
-            KotSniffEngine(
+        fun createDefault(maxAssertions: Int = 3): KotSniffEngine {
+            val detectors =
                 listOf(
+                    IgnoredTestDetector(),
                     SleepyTestDetector(),
                     ConditionalTestLogicDetector(),
-                    IgnoredTestDetector(),
                     ExceptionHandlingDetector(),
                     UnknownTestDetector(),
                     DuplicateAssertDetector(),
                     MagicNumberTestDetector(),
-                ),
-            )
+                    AssertionRouletteDetector(maxAssertions),
+                )
+            return KotSniffEngine(detectors)
+        }
     }
 }

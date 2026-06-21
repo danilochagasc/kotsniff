@@ -4,8 +4,8 @@ import br.com.kotsniff.analyzer.utils.isAssertion
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell
-import br.com.kotsniff.core.models.DetectionResult
 import br.com.kotsniff.core.models.CodeLocation
+import br.com.kotsniff.core.models.DetectionResult
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
@@ -51,19 +51,19 @@ class MagicNumberTestDetector : TestSmellDetector {
                                 // Remove L and F suffixes for parsing check
                                 val numericText = text.replace(Regex("[fFlL]"), "")
                                 val isNumber = numericText.toDoubleOrNull() != null
-                                
+
                                 if (isNumber && !allowedNumbers.contains(text)) {
                                     results.add(
                                         DetectionResult(
                                             smellType = TestSmell.MAGIC_NUMBER_TEST,
                                             location = constant.toCodeLocation(filePath),
-                                            codeSnippet = constant.text
-                                        )
+                                            codeSnippet = constant.text,
+                                        ),
                                     )
                                 }
                                 super.visitConstantExpression(constant)
                             }
-                        }
+                        },
                     )
                 }
             },

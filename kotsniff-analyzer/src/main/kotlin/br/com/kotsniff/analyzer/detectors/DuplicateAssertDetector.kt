@@ -4,8 +4,8 @@ import br.com.kotsniff.analyzer.utils.isAssertion
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell
-import br.com.kotsniff.core.models.DetectionResult
 import br.com.kotsniff.core.models.CodeLocation
+import br.com.kotsniff.core.models.DetectionResult
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
@@ -45,17 +45,20 @@ class DuplicateAssertDetector : TestSmellDetector {
                     super.visitBinaryExpression(expression)
                 }
 
-                private fun checkAndAddAssertion(text: String, element: KtElement) {
+                private fun checkAndAddAssertion(
+                    text: String,
+                    element: KtElement,
+                ) {
                     val normalizedText = text.replace(Regex("\\s+"), " ").trim()
-                    
+
                     if (assertions.contains(normalizedText)) {
                         if (!duplicatesReported.contains(normalizedText)) {
                             results.add(
                                 DetectionResult(
                                     smellType = TestSmell.DUPLICATE_ASSERT,
                                     location = element.toCodeLocation(filePath),
-                                    codeSnippet = text
-                                )
+                                    codeSnippet = text,
+                                ),
                             )
                         }
                     } else {

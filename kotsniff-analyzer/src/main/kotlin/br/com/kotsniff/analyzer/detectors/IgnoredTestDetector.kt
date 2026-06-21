@@ -60,7 +60,7 @@ class IgnoredTestDetector : TestSmellDetector {
                 ),
             )
         }
-        
+
         // 4. Function-level annotations (for AnnotationSpec)
         if (expr is org.jetbrains.kotlin.psi.KtNamedFunction) {
             val hasIgnoreAnnotation = expr.annotationEntries.any { it.shortName?.asString() in IGNORE_ANNOTATIONS }

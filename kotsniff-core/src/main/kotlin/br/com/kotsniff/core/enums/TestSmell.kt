@@ -17,7 +17,9 @@ enum class TestSmell(
     EXCEPTION_HANDLING("Test methods should not use try/catch blocks. The test framework should handle exceptions."),
     UNKNOWN_TEST("A test block that executes code but contains NO assertions."),
     DUPLICATE_ASSERT("Testing the exact same condition multiple times in the same test block."),
-    MAGIC_NUMBER_TEST("Using arbitrary numeric literals in assertions without explaining their meaning via constants.");
+    MAGIC_NUMBER_TEST("Using arbitrary numeric literals in assertions without explaining their meaning via constants."),
+    ASSERTION_ROULETTE("Having too many assertions in a single test block, making it hard to identify the failure reason."),
+    ;
 
     /**
      * A pretty-printed name for the smell (e.g. IGNORED_TEST -> "Ignored Test").

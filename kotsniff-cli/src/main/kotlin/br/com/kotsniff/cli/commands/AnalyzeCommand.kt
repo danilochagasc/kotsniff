@@ -15,6 +15,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
+import com.github.ajalt.clikt.parameters.types.int
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -33,6 +34,7 @@ class AnalyzeCommand :
     private val format by option("-f", "--format", help = "Output format").choice("markdown", "json", "text", "html").default("markdown")
     private val output by option("-o", "--output", help = "Output file path")
     private val showDetails by option("--show-details", help = "Print individual test smells to the terminal").flag(default = false)
+    private val maxAssertions by option("--max-assertions", help = "Maximum allowed assertions per test block").int().default(3)
 
     override fun run() {
         val printer = TerminalPrinter { msg, err -> echo(msg, err = err) }
@@ -44,7 +46,7 @@ class AnalyzeCommand :
             throw ProgramResult(1)
         }
 
-        val engine = KotSniffEngine.createDefault()
+        val engine = KotSniffEngine.createDefault(maxAssertions)
         val runner = KotSniffRunner(engine)
 
         var totalFiles = 0

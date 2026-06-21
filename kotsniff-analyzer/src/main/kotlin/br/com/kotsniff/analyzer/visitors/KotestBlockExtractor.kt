@@ -1,15 +1,14 @@
 package br.com.kotsniff.analyzer.visitors
 
+import br.com.kotsniff.analyzer.utils.KotestDslKeywords
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
-import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtPrefixExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
-
-import br.com.kotsniff.analyzer.utils.KotestDslKeywords
 
 /**
  * A PSI tree visitor that identifies Kotest test blocks across multiple Spec styles.
@@ -87,10 +86,10 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
         if (operation in KotestDslKeywords.ALL_DSL_NAMES) {
             val left = expression.left?.text?.removeSurrounding("\"") ?: return
             val right = expression.right ?: return
-            
+
             // Kotest DSL blocks always have a lambda on the right side
             if (right !is org.jetbrains.kotlin.psi.KtLambdaExpression) return
-            
+
             // In FreeSpec and WordSpec, the right side is the lambda containing nested tests
             // e.g. "container" - { ... }
             val isTerminal = operation in KotestDslKeywords.ALL_TERMINALS
