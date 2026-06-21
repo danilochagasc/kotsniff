@@ -144,7 +144,7 @@ class HtmlReportGenerator : ReportGenerator {
                     smells.forEach { smell ->
                         val lineText = if (smell.location.line == smell.location.endLine) "line ${smell.location.line}" else "lines ${smell.location.line}-${smell.location.endLine}"
                         appendLine("                        <li class=\"smell-item\">")
-                        appendLine("                            <span><strong>${smell.smellType}</strong> on $lineText</span>")
+                        appendLine("                            <span><strong>${smell.smellType.displayName}</strong> on $lineText</span>")
                         appendLine("                            <button class=\"go-to-btn\" onclick=\"scrollToSmell('${smell.location.line}')\">🎯 Go to smell</button>")
                         appendLine("                        </li>")
                     }

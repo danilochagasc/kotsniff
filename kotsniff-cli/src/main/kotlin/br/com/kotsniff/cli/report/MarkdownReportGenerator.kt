@@ -37,7 +37,7 @@ class MarkdownReportGenerator : ReportGenerator {
                         appendLine("### 📁 $file")
                         appendLine()
                         smells.forEach { smell ->
-                            appendLine("- **[${smell.smellType}]** line ${smell.location.line}:")
+                            appendLine("- **[${smell.smellType.displayName}]** line ${smell.location.line}:")
                             appendLine("```kotlin")
                             // We don't necessarily need the 4-space prefix for markdown code blocks,
                             // but formatCodeSnippet() gives us a uniform baseline.

@@ -32,7 +32,7 @@ class TextReportGenerator : ReportGenerator {
                     .forEach { (file, smells) ->
                         appendLine("\nFile: $file")
                         smells.forEach { smell ->
-                            appendLine("  - [${smell.smellType}] line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}")
+                            appendLine("  - [${smell.smellType.displayName}] line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}")
                         }
                     }
 

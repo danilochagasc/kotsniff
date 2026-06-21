@@ -40,7 +40,7 @@ class TerminalPrinter(
             .forEach { (file, smells) ->
                 echo("\n$CYAN->$RESET $file", false)
                 smells.forEach { smell ->
-                    echo("  - $RED[${smell.smellType}]$RESET line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}", false)
+                    echo("  - $RED[${smell.smellType.displayName}]$RESET line ${smell.location.line}:\n${smell.codeSnippet.formatCodeSnippet()}", false)
                 }
             }
     }
