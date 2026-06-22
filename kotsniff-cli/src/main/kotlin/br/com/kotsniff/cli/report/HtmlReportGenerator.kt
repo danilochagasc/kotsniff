@@ -132,6 +132,11 @@ class HtmlReportGenerator : ReportGenerator {
                 appendLine(
                     "        .line-highlight { background: rgba(251, 191, 36, 0.15) !important; border-left: 4px solid var(--warning) !important; box-shadow: inset 4px 0 10px rgba(251, 191, 36, 0.1); }",
                 )
+                appendLine("        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; }")
+                appendLine("        .metric-card { background: rgba(129, 140, 248, 0.1); border: 1px solid var(--primary-glow); border-radius: 16px; padding: 2rem; text-align: center; transition: transform 0.3s, box-shadow 0.3s; box-shadow: inset 0 0 20px rgba(129, 140, 248, 0.05); }")
+                appendLine("        .metric-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(129, 140, 248, 0.2), inset 0 0 20px rgba(129, 140, 248, 0.1); }")
+                appendLine("        .metric-value { font-size: 3.5rem; font-weight: 700; color: var(--text-main); line-height: 1; margin-bottom: 0.75rem; text-shadow: 0 0 20px rgba(255,255,255,0.3); }")
+                appendLine("        .metric-label { font-size: 0.95rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }")
                 appendLine("    </style>")
                 appendLine("</head>")
                 appendLine("<body>")
@@ -141,6 +146,7 @@ class HtmlReportGenerator : ReportGenerator {
                 appendLine("        </div>")
                 appendLine("        <div class=\"summary-stats\">")
                 appendLine("            <span>Files Scanned <span class=\"stat-value\">${report.totalFilesScanned}</span></span>")
+                appendLine("            <span>Lines of Code <span class=\"stat-value\">${report.totalLinesOfCode}</span></span>")
                 appendLine("            <span>Time <span class=\"stat-value\">${report.timeTakenMs}ms</span></span>")
 
                 val smellColor = if (report.smellsFound == 0) "stat-success" else "stat-danger"
@@ -162,13 +168,15 @@ class HtmlReportGenerator : ReportGenerator {
                     )
                     appendLine("            </div>")
                 } else {
+                    appendLine("            <button class=\"file-btn active\" onclick=\"showDashboard()\" id=\"btn-dashboard\">")
+                    appendLine("                📊 Dashboard")
+                    appendLine("            </button>")
                     appendLine(
-                        "            <h3 style=\"margin-top: 0; margin-bottom: 1rem; color: var(--text-main); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;\">Files with Smells</h3>",
+                        "            <h3 style=\"margin-top: 1.5rem; margin-bottom: 1rem; color: var(--text-main); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;\">Files with Smells</h3>",
                     )
-                    groupedSmells.keys.forEachIndexed { index, filePath ->
-                        val activeClass = if (index == 0) "active" else ""
+                    groupedSmells.keys.forEach { filePath ->
                         appendLine(
-                            "            <button class=\"file-btn $activeClass\" onclick=\"showFile('$filePath')\" id=\"btn-$filePath\">",
+                            "            <button class=\"file-btn\" onclick=\"showFile('$filePath')\" id=\"btn-$filePath\">",
                         )
                         appendLine("                📄 ${File(filePath).name}")
                         appendLine("            </button>")
@@ -187,9 +195,23 @@ class HtmlReportGenerator : ReportGenerator {
 
                 // Content Area
                 appendLine("        <div class=\"content-area\" id=\"main-content-area\">")
+                
+                if (groupedSmells.isNotEmpty()) {
+                    appendLine("            <div class=\"file-content active\" id=\"content-dashboard\">")
+                    appendLine("                <h2 class=\"file-header\">📊 Analysis Dashboard</h2>")
+                    appendLine("                <p style=\"color: var(--text-muted); margin-bottom: 2rem;\">Overview of test smells detected across your codebase.</p>")
+                    appendLine("                <div class=\"metrics-grid\">")
+                    report.smellsByType.forEach { (type, count) ->
+                        appendLine("                    <div class=\"metric-card\">")
+                        appendLine("                        <div class=\"metric-value\">$count</div>")
+                        appendLine("                        <div class=\"metric-label\">$type</div>")
+                        appendLine("                    </div>")
+                    }
+                    appendLine("                </div>")
+                    appendLine("            </div>")
+                }
+
                 groupedSmells.forEach { (filePath, smells) ->
-                    val isFirst = filePath == groupedSmells.keys.first()
-                    val activeClass = if (isFirst) "active" else ""
                     val lineNumbers =
                         smells.joinToString(",") {
                             if (it.location.line == it.location.endLine) {
@@ -199,7 +221,7 @@ class HtmlReportGenerator : ReportGenerator {
                             }
                         }
 
-                    appendLine("            <div class=\"file-content $activeClass\" id=\"content-$filePath\">")
+                    appendLine("            <div class=\"file-content\" id=\"content-$filePath\">")
                     appendLine("                <h2 class=\"file-header\">📄 $filePath</h2>")
 
                     // Smells summary
@@ -286,19 +308,29 @@ class HtmlReportGenerator : ReportGenerator {
 
                 // Interaction Logic
                 appendLine("    <script>")
-                appendLine("        let currentActiveFile = '${groupedSmells.keys.firstOrNull() ?: ""}';")
+                appendLine("        let currentActiveFile = 'dashboard';")
                 appendLine("        let currentSmellIndex = -1;")
                 appendLine("")
                 appendLine("        function updateFloatingNav() {")
                 appendLine("            const nav = document.getElementById('floating-nav');")
                 appendLine("            if (!nav) return;")
                 appendLine(
-                    "            if (currentActiveFile && fileSmellsMap[currentActiveFile] && fileSmellsMap[currentActiveFile].length > 0) {",
+                    "            if (currentActiveFile && currentActiveFile !== 'dashboard' && fileSmellsMap[currentActiveFile] && fileSmellsMap[currentActiveFile].length > 0) {",
                 )
                 appendLine("                nav.classList.add('visible');")
                 appendLine("            } else {")
                 appendLine("                nav.classList.remove('visible');")
                 appendLine("            }")
+                appendLine("        }")
+                appendLine("")
+                appendLine("        function showDashboard() {")
+                appendLine("            currentActiveFile = 'dashboard';")
+                appendLine("            currentSmellIndex = -1;")
+                appendLine("            document.querySelectorAll('.file-content').forEach(el => el.classList.remove('active'));")
+                appendLine("            document.querySelectorAll('.file-btn').forEach(el => el.classList.remove('active'));")
+                appendLine("            document.getElementById('content-dashboard').classList.add('active');")
+                appendLine("            document.getElementById('btn-dashboard').classList.add('active');")
+                appendLine("            updateFloatingNav();")
                 appendLine("        }")
                 appendLine("")
                 appendLine("        function showFile(filePath) {")

@@ -50,6 +50,7 @@ class AnalyzeCommand :
         val runner = KotSniffRunner(engine)
 
         var totalFiles = 0
+        var totalLoc = 0
         var results = emptyList<DetectionResult>()
         var failedFiles = emptyList<String>()
 
@@ -57,6 +58,7 @@ class AnalyzeCommand :
             measureTimeMillis {
                 val summary = runner.scanDirectory(targetDir)
                 totalFiles = summary.totalFilesScanned
+                totalLoc = summary.totalLinesOfCode
                 results = summary.smells
                 failedFiles = summary.failedFiles
             }
@@ -70,12 +72,16 @@ class AnalyzeCommand :
         }
 
         val outputFile = resolveOutputFile(targetDir)
+        
+        val smellsByType = results.groupingBy { it.smellType.displayName }.eachCount()
 
         val report =
             Report(
                 totalFilesScanned = totalFiles,
+                totalLinesOfCode = totalLoc,
                 timeTakenMs = timeTakenMs,
                 smellsFound = results.size,
+                smellsByType = smellsByType,
                 smells = results,
                 failedFiles = failedFiles,
             )

@@ -18,8 +18,16 @@ class TextReportGenerator : ReportGenerator {
                 appendLine("KotSniff Report")
                 appendLine("═══════════════════════════════════════")
                 appendLine("Files scanned: ${report.totalFilesScanned}")
+                appendLine("Lines of code: ${report.totalLinesOfCode}")
                 appendLine("Time taken: ${report.timeTakenMs}ms")
                 appendLine("Smells found: ${report.smellsFound}")
+                if (report.smellsByType.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Breakdown:")
+                    report.smellsByType.forEach { (type, count) ->
+                        appendLine("  - $count $type")
+                    }
+                }
                 appendLine("═══════════════════════════════════════")
 
                 if (report.smells.isEmpty()) {

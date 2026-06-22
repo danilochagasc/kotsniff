@@ -26,10 +26,12 @@ class KotSniffRunner(
                         async {
                             val relativePath = file.relativeTo(rootDir).invariantSeparatorsPath
                             try {
-                                val fileSmells = engine.analyze(file.readText(), relativePath)
-                                Pair(fileSmells, null)
+                                val text = file.readText()
+                                val loc = text.lines().size
+                                val fileSmells = engine.analyze(text, relativePath)
+                                Triple(fileSmells, null, loc)
                             } catch (e: Exception) {
-                                Pair(emptyList<DetectionResult>(), relativePath)
+                                Triple(emptyList<DetectionResult>(), relativePath, 0)
                             }
                         }
                     }
@@ -38,9 +40,11 @@ class KotSniffRunner(
 
         val results = resultsAndFailures.flatMap { it.first }
         val failedFiles = resultsAndFailures.mapNotNull { it.second }
+        val totalLines = resultsAndFailures.sumOf { it.third }
 
         return ScanSummary(
             totalFilesScanned = ktFiles.size,
+            totalLinesOfCode = totalLines,
             smells = results,
             failedFiles = failedFiles,
         )

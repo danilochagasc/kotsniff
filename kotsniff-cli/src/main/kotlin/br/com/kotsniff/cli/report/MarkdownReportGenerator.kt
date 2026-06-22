@@ -19,9 +19,18 @@ class MarkdownReportGenerator : ReportGenerator {
                 appendLine()
                 appendLine("## Summary")
                 appendLine("- **Files scanned:** ${report.totalFilesScanned}")
+                appendLine("- **Lines of code:** ${report.totalLinesOfCode}")
                 appendLine("- **Time taken:** ${report.timeTakenMs}ms")
                 appendLine("- **Smells found:** ${report.smellsFound}")
                 appendLine()
+
+                if (report.smellsByType.isNotEmpty()) {
+                    appendLine("### Breakdown")
+                    report.smellsByType.forEach { (type, count) ->
+                        appendLine("- $count **$type**")
+                    }
+                    appendLine()
+                }
 
                 if (report.smells.isEmpty()) {
                     appendLine("🎉 **Awesome! No test smells found!**")
