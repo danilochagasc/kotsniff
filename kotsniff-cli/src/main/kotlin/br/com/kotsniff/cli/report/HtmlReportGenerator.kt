@@ -31,16 +31,16 @@ class HtmlReportGenerator : ReportGenerator {
                 )
                 appendLine("    <style>")
                 appendLine("        :root {")
-                appendLine("            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);")
-                appendLine("            --glass-bg: rgba(255, 255, 255, 0.05);")
-                appendLine("            --glass-border: rgba(255, 255, 255, 0.1);")
-                appendLine("            --primary: #818cf8;")
-                appendLine("            --primary-glow: rgba(129, 140, 248, 0.4);")
-                appendLine("            --text-main: #f8fafc;")
-                appendLine("            --text-muted: #94a3b8;")
-                appendLine("            --danger: #fb7185;")
-                appendLine("            --warning: #fbbf24;")
-                appendLine("            --success: #34d399;")
+                appendLine("            --bg-gradient: linear-gradient(135deg, #18181b 0%, #09090b 100%);")
+                appendLine("            --glass-bg: rgba(255, 255, 255, 0.03);")
+                appendLine("            --glass-border: rgba(255, 255, 255, 0.08);")
+                appendLine("            --primary: #3b82f6;")
+                appendLine("            --primary-glow: rgba(59, 130, 246, 0.3);")
+                appendLine("            --text-main: #f4f4f5;")
+                appendLine("            --text-muted: #a1a1aa;")
+                appendLine("            --danger: #ef4444;")
+                appendLine("            --warning: #f59e0b;")
+                appendLine("            --success: #10b981;")
                 appendLine("        }")
                 appendLine(
                     "        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: var(--bg-gradient); color: var(--text-main); overflow: hidden; }",
@@ -50,7 +50,7 @@ class HtmlReportGenerator : ReportGenerator {
                 )
                 appendLine("        .brand { display: flex; align-items: center; gap: 1rem; }")
                 appendLine(
-                    "        h1 { margin: 0; font-size: 1.75rem; font-weight: 700; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }",
+                    "        h1 { margin: 0; font-size: 1.75rem; font-weight: 700; background: linear-gradient(to right, #f4f4f5, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }",
                 )
                 appendLine(
                     "        .summary-stats { display: flex; gap: 2.5rem; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); }",
@@ -78,10 +78,10 @@ class HtmlReportGenerator : ReportGenerator {
                     "        .file-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); color: var(--text-main); }",
                 )
                 appendLine(
-                    "        .file-btn.active { background: rgba(129, 140, 248, 0.15); color: var(--primary); border-color: var(--primary-glow); box-shadow: 0 0 20px var(--primary-glow); }",
+                    "        .file-btn.active { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border-color: var(--glass-border); box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); }",
                 )
                 appendLine(
-                    "        .file-btn.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); border-radius: 4px 0 0 4px; }",
+                    "        .file-btn.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--text-muted); border-radius: 4px 0 0 4px; }",
                 )
                 appendLine("        .file-content { display: none; animation: fadeIn 0.4s ease-out forwards; }")
                 appendLine("        .file-content.active { display: block; }")
@@ -106,13 +106,13 @@ class HtmlReportGenerator : ReportGenerator {
                 )
                 appendLine("        .go-to-btn:hover { background: rgba(251, 191, 36, 0.4); color: white; transform: translateY(-1px); }")
                 appendLine(
-                    "        .floating-nav { position: fixed; bottom: 2rem; right: 3rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--glass-bg); backdrop-filter: blur(12px); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }",
+                    "        .floating-nav { position: fixed; bottom: 2rem; right: 3rem; display: flex; gap: 0.5rem; background: rgba(24, 24, 27, 0.9); backdrop-filter: blur(12px); padding: 0.75rem; border-radius: 100px; border: 1px solid var(--glass-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; transform: translateY(10px); }",
                 )
-                appendLine("        .floating-nav.visible { opacity: 1; pointer-events: auto; }")
+                appendLine("        .floating-nav.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }")
                 appendLine(
-                    "        .nav-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-size: 1.2rem; }",
+                    "        .nav-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 100px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.9rem; font-weight: 600; }",
                 )
-                appendLine("        .nav-btn:hover { background: rgba(129, 140, 248, 0.3); border-color: var(--primary); color: white; }")
+                appendLine("        .nav-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--glass-border); color: white; }")
                 appendLine(
                     "        .failed-files { margin-top: 2rem; background: rgba(251, 113, 133, 0.05); border: 1px solid rgba(251, 113, 133, 0.2); padding: 1.25rem; border-radius: 12px; }",
                 )
@@ -133,8 +133,8 @@ class HtmlReportGenerator : ReportGenerator {
                     "        .line-highlight { background: rgba(251, 191, 36, 0.15) !important; border-left: 4px solid var(--warning) !important; box-shadow: inset 4px 0 10px rgba(251, 191, 36, 0.1); }",
                 )
                 appendLine("        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; }")
-                appendLine("        .metric-card { background: rgba(129, 140, 248, 0.1); border: 1px solid var(--primary-glow); border-radius: 16px; padding: 2rem; text-align: center; transition: transform 0.3s, box-shadow 0.3s; box-shadow: inset 0 0 20px rgba(129, 140, 248, 0.05); }")
-                appendLine("        .metric-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(129, 140, 248, 0.2), inset 0 0 20px rgba(129, 140, 248, 0.1); }")
+                appendLine("        .metric-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; text-align: center; transition: transform 0.3s, box-shadow 0.3s; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2); }")
+                appendLine("        .metric-card:hover { transform: translateY(-5px); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.05); }")
                 appendLine("        .metric-value { font-size: 3.5rem; font-weight: 700; color: var(--text-main); line-height: 1; margin-bottom: 0.75rem; text-shadow: 0 0 20px rgba(255,255,255,0.3); }")
                 appendLine("        .metric-label { font-size: 0.95rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }")
                 appendLine("    </style>")
@@ -228,7 +228,7 @@ class HtmlReportGenerator : ReportGenerator {
                     appendLine("                <div class=\"smells-list\">")
                     appendLine("                    <strong>Detected Smells:</strong>")
                     appendLine("                    <ul>")
-                    smells.forEach { smell ->
+                    smells.forEachIndexed { index, smell ->
                         val lineText =
                             if (smell.location.line ==
                                 smell.location.endLine
@@ -240,7 +240,7 @@ class HtmlReportGenerator : ReportGenerator {
                         appendLine("                        <li class=\"smell-item\">")
                         appendLine("                            <span><strong>${smell.smellType.displayName}</strong> on $lineText</span>")
                         appendLine(
-                            "                            <button class=\"go-to-btn\" onclick=\"scrollToSmell('${smell.location.line}')\">🎯 Go to smell</button>",
+                            "                            <button class=\"go-to-btn\" onclick=\"scrollToSmellIndex($index)\">🎯 Go to smell</button>",
                         )
                         appendLine("                        </li>")
                     }
@@ -281,8 +281,12 @@ class HtmlReportGenerator : ReportGenerator {
                 // Floating Navigation
                 if (groupedSmells.isNotEmpty()) {
                     appendLine("        <div class=\"floating-nav\" id=\"floating-nav\">")
-                    appendLine("            <button class=\"nav-btn\" onclick=\"navigateSmell(-1)\" title=\"Previous Smell\">⬆️</button>")
-                    appendLine("            <button class=\"nav-btn\" onclick=\"navigateSmell(1)\" title=\"Next Smell\">⬇️</button>")
+                    appendLine("            <button class=\"nav-btn\" onclick=\"navigateSmell(-1)\" title=\"Previous Smell\">")
+                    appendLine("                <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18 15-6-6-6 6\"/></svg> Prev")
+                    appendLine("            </button>")
+                    appendLine("            <button class=\"nav-btn\" onclick=\"navigateSmell(1)\" title=\"Next Smell\">")
+                    appendLine("                Next <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m6 9 6 6 6-6\"/></svg>")
+                    appendLine("            </button>")
                     appendLine("        </div>")
                 }
 
@@ -363,24 +367,22 @@ class HtmlReportGenerator : ReportGenerator {
                 appendLine("            }, 50);")
                 appendLine("        }")
                 appendLine("")
-                appendLine("        function scrollToSmell(lineStart) {")
+                appendLine("        function scrollToSmellIndex(index) {")
                 appendLine("            if (!currentActiveFile) return;")
-                appendLine("            // Update index tracking")
                 appendLine("            const smells = fileSmellsMap[currentActiveFile];")
-                appendLine("            if (smells) {")
-                appendLine("                currentSmellIndex = smells.indexOf(parseInt(lineStart));")
-                appendLine("            }")
+                appendLine("            if (!smells || index < 0 || index >= smells.length) return;")
+                appendLine("            ")
+                appendLine("            currentSmellIndex = index;")
+                appendLine("            const lineStart = smells[currentSmellIndex];")
                 appendLine("            ")
                 appendLine("            const container = document.getElementById('content-' + currentActiveFile);")
                 appendLine("            if (!container) return;")
+                appendLine("            ")
                 appendLine("            // Wait for Prism to render the highlights if necessary")
                 appendLine("            setTimeout(() => {")
-                appendLine("                // Prism creates divs with data-start attribute for highlights")
                 appendLine("                const highlight = container.querySelector(`.line-highlight[data-start=\"\${lineStart}\"]`);")
                 appendLine("                if (highlight) {")
-                appendLine("                    // Smooth scroll the highlight into view within the scrollable content-area")
                 appendLine("                    highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });")
-                appendLine("                    // Add a brief pulse effect")
                 appendLine("                    highlight.style.transition = 'background-color 0.3s';")
                 appendLine("                    highlight.style.backgroundColor = 'rgba(251, 191, 36, 0.4)';")
                 appendLine("                    setTimeout(() => { highlight.style.backgroundColor = ''; }, 600);")
@@ -393,11 +395,11 @@ class HtmlReportGenerator : ReportGenerator {
                 appendLine("            const smells = fileSmellsMap[currentActiveFile];")
                 appendLine("            if (!smells || smells.length === 0) return;")
                 appendLine("            ")
-                appendLine("            currentSmellIndex += direction;")
-                appendLine("            if (currentSmellIndex < 0) currentSmellIndex = 0;")
-                appendLine("            if (currentSmellIndex >= smells.length) currentSmellIndex = smells.length - 1;")
+                appendLine("            let nextIndex = currentSmellIndex + direction;")
+                appendLine("            if (nextIndex < 0) nextIndex = 0;")
+                appendLine("            if (nextIndex >= smells.length) nextIndex = smells.length - 1;")
                 appendLine("            ")
-                appendLine("            scrollToSmell(smells[currentSmellIndex]);")
+                appendLine("            scrollToSmellIndex(nextIndex);")
                 appendLine("        }")
                 appendLine("")
                 appendLine("        // Initialize floating nav")
