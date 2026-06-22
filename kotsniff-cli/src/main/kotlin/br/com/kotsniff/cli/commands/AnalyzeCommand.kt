@@ -77,6 +77,7 @@ class AnalyzeCommand :
 
         val report =
             Report(
+                projectName = targetDir.canonicalFile.name,
                 totalFilesScanned = totalFiles,
                 totalLinesOfCode = totalLoc,
                 timeTakenMs = timeTakenMs,

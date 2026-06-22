@@ -142,7 +142,7 @@ class HtmlReportGenerator : ReportGenerator {
                 appendLine("<body>")
                 appendLine("    <header>")
                 appendLine("        <div class=\"brand\">")
-                appendLine("            <h1>KotSniff Report</h1>")
+                appendLine("            <h1>KotSniff Report <span style=\"color: var(--text-muted); font-weight: 400; font-size: 1.4rem;\">| ${report.projectName}</span></h1>")
                 appendLine("        </div>")
                 appendLine("        <div class=\"summary-stats\">")
                 appendLine("            <span>Files Scanned <span class=\"stat-value\">${report.totalFilesScanned}</span></span>")

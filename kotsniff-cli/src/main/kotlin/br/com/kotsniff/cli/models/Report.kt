@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Report(
+    val projectName: String,
     val totalFilesScanned: Int,
     val totalLinesOfCode: Int,
     val timeTakenMs: Long,

@@ -16,6 +16,7 @@ class TextReportGenerator : ReportGenerator {
         val content =
             buildString {
                 appendLine("KotSniff Report")
+                appendLine("Project: ${report.projectName}")
                 appendLine("═══════════════════════════════════════")
                 appendLine("Files scanned: ${report.totalFilesScanned}")
                 appendLine("Lines of code: ${report.totalLinesOfCode}")

@@ -15,7 +15,7 @@ class MarkdownReportGenerator : ReportGenerator {
     ) {
         val content =
             buildString {
-                appendLine("# KotSniff Report")
+                appendLine("# KotSniff Report: ${report.projectName}")
                 appendLine()
                 appendLine("## Summary")
                 appendLine("- **Files scanned:** ${report.totalFilesScanned}")
