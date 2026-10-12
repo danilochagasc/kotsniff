@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.clikt)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.mordant)
     
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)

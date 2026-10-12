@@ -25,35 +25,35 @@ class ConditionalTestLogicDetectorTest :
             it("should detect if in StringSpec") {
                 val results = engine.analyze(conditionalStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().ruleId shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("if (1 == 1)") shouldBe true
             }
 
             it("should detect when in FunSpec") {
                 val results = engine.analyze(conditionalFunSpec(), FILE_PATH_FUN_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().ruleId shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("when (1)") shouldBe true
             }
 
             it("should detect if in BehaviorSpec") {
                 val results = engine.analyze(conditionalBehaviorSpec(), FILE_PATH_BEHAVIOR_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().ruleId shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("if (true)") shouldBe true
             }
 
             it("should detect when in DescribeSpec") {
                 val results = engine.analyze(conditionalDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().ruleId shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("when (true)") shouldBe true
             }
 
             it("should detect if in DescribeSpec with init block") {
                 val results = engine.analyze(conditionalDescribeSpecInit(), FILE_PATH_DESCRIBE_SPEC_INIT)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe CONDITIONAL_TEST_LOGIC
+                results.first().ruleId shouldBe CONDITIONAL_TEST_LOGIC
                 results.first().codeSnippet.startsWith("if (true)") shouldBe true
             }
         }

@@ -36,7 +36,7 @@ object ExceptionHandlingDetectorFixture {
         """
         class SampleExceptionHandlingBehaviorSpec : BehaviorSpec({
             given("a scenario") {
-                when("something happens") {
+                `when`("something happens") {
                     then("a test with try catch") {
                         try {
                             val a = 1 / 0

@@ -10,11 +10,14 @@ Write-Host "Installing KotSniff CLI to $TargetDir..."
 
 # Remove old installation if exists
 if (Test-Path $TargetDir) {
-    Remove-Item -Path $TargetDir -Recurse -Force
+    Remove-Item -Path $TargetDir -Recurse -Force -ErrorAction SilentlyContinue
 }
+New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
 
-# Copy the compiled application
-Copy-Item -Path $InstallDistDir -Destination $TargetDir -Recurse -Force
+# Copy the compiled application contents (bin/, lib/) directly into the target,
+# so the launcher ends up at <target>/bin/kotsniff regardless of whether the
+# target directory already existed.
+Copy-Item -Path (Join-Path $InstallDistDir '*') -Destination $TargetDir -Recurse -Force
 
 Write-Host "Successfully copied KotSniff CLI to $TargetDir"
 

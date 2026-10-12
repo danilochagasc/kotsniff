@@ -4,16 +4,20 @@ import br.com.kotsniff.analyzer.utils.TestDslKeywords
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
+import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 
 /**
  * A PSI tree visitor that identifies Kotest test blocks across multiple Spec styles.
  *
- * Traverses the AST looking for classes that extend a `*Spec` super type,
- * then extracts test block names and bodies from within those classes.
+ * Traverses the AST looking for classes that extend a Kotest spec type (directly
+ * or through a base class declared in the same file), then extracts test block
+ * names and bodies from within those classes.
  *
  * Supported patterns:
  * - **StringSpec**: `"test name" { body }` (string-invoke pattern)
@@ -35,18 +39,62 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
 
     private var specDepth = 0
 
-    override fun visitClassOrObject(classOrObject: KtClassOrObject) {
-        val isSpec =
-            classOrObject.superTypeListEntries.any { entry ->
-                entry.typeReference?.text?.endsWith("Spec") == true
+    /** Simple names of classes in the current file that are Kotest specs. */
+    private val localSpecNames = mutableSetOf<String>()
+
+    override fun visitKtFile(file: KtFile) {
+        localSpecNames.addAll(resolveSpecNames(file))
+        super.visitKtFile(file)
+    }
+
+    /**
+     * Resolves which classes of a file are specs, including classes that extend
+     * another spec declared in the same file (transitive inheritance).
+     */
+    private fun resolveSpecNames(file: KtFile): Set<String> {
+        val classes = file.collectDescendantsOfType<KtClassOrObject>()
+        val supersByClass =
+            classes
+                .mapNotNull { klass ->
+                    val name = klass.name ?: return@mapNotNull null
+                    name to
+                        klass.superTypeListEntries.mapNotNull { entry ->
+                            entry.typeReference
+                                ?.text
+                                ?.substringBefore("<")
+                                ?.substringAfterLast('.')
+                                ?.trim()
+                        }
+                }.toMap()
+
+        val specNames = mutableSetOf<String>()
+        var changed = true
+        while (changed) {
+            changed = false
+            for ((name, supers) in supersByClass) {
+                if (name in specNames) continue
+                if (supers.any { TestDslKeywords.looksLikeSpecName(it) || it in specNames }) {
+                    specNames.add(name)
+                    changed = true
+                }
             }
+        }
+        return specNames
+    }
+
+    override fun visitClassOrObject(classOrObject: KtClassOrObject) {
+        val isSpec = classOrObject.name in localSpecNames
 
         if (isSpec) {
             specDepth++
             super.visitClassOrObject(classOrObject)
             specDepth--
         } else {
+            // Calls inside a non-spec class (even if nested in a spec) are not tests.
+            val previous = specDepth
+            specDepth = 0
             super.visitClassOrObject(classOrObject)
+            specDepth = previous
         }
     }
 
@@ -87,7 +135,7 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
             val right = expression.right ?: return
 
             // Kotest DSL blocks always have a lambda on the right side
-            if (right !is org.jetbrains.kotlin.psi.KtLambdaExpression) return
+            if (right !is KtLambdaExpression) return
 
             // In FreeSpec and WordSpec, the right side is the lambda containing nested tests
             // e.g. "container" - { ... }

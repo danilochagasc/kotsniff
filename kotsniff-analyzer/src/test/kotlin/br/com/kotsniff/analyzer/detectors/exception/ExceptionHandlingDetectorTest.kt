@@ -23,28 +23,28 @@ class ExceptionHandlingDetectorTest :
             it("should detect try catch in StringSpec") {
                 val results = engine.analyze(exceptionHandlingStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe EXCEPTION_HANDLING
+                results.first().ruleId shouldBe EXCEPTION_HANDLING
                 results.first().codeSnippet.startsWith("try {") shouldBe true
             }
 
             it("should detect try catch in FunSpec") {
                 val results = engine.analyze(exceptionHandlingFunSpec(), FILE_PATH_FUN_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe EXCEPTION_HANDLING
+                results.first().ruleId shouldBe EXCEPTION_HANDLING
                 results.first().codeSnippet.startsWith("try {") shouldBe true
             }
 
             it("should detect try catch in BehaviorSpec") {
                 val results = engine.analyze(exceptionHandlingBehaviorSpec(), FILE_PATH_BEHAVIOR_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe EXCEPTION_HANDLING
+                results.first().ruleId shouldBe EXCEPTION_HANDLING
                 results.first().codeSnippet.startsWith("try {") shouldBe true
             }
 
             it("should detect try catch in DescribeSpec") {
                 val results = engine.analyze(exceptionHandlingDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe EXCEPTION_HANDLING
+                results.first().ruleId shouldBe EXCEPTION_HANDLING
                 results.first().codeSnippet.startsWith("try {") shouldBe true
             }
         }

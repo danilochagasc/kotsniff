@@ -32,7 +32,7 @@ object UnknownTestDetectorFixture {
         """
         class SampleUnknownTestBehaviorSpec : BehaviorSpec({
             given("a scenario") {
-                when("something happens") {
+                `when`("something happens") {
                     then("a test with no assertions") {
                         val a = 1
                         val b = 2

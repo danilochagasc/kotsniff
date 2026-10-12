@@ -1,0 +1,34 @@
+# KotSniff reference corpus manifest (pipe-separated).
+# Columns: file | rule | expectedCount | reportDelay | limitation
+# - expectedCount is the number of diagnostics of `rule` the file must produce.
+# - reportDelay enables the opt-in Sleepy Test `delay(...)` detection.
+# - limitation, when present, documents a knowingly unsupported behaviour; such
+#   cases are asserted (as regression guards) but excluded from the metrics.
+unknown/positive_no_assertion.kt|UNKNOWN_TEST|1||
+unknown/negative_with_assertion.kt|UNKNOWN_TEST|0||
+unknown/negative_with_verify.kt|UNKNOWN_TEST|0||
+unknown/positive_domain_name.kt|UNKNOWN_TEST|1||
+unknown/limitation_helper_assertion.kt|UNKNOWN_TEST|1||Assertions inside helper functions are not visible without whole-program analysis.
+sleepy/positive_thread_sleep.kt|SLEEPY_TEST|1||
+sleepy/negative_delay_default.kt|SLEEPY_TEST|0||
+sleepy/negative_other_sleep.kt|SLEEPY_TEST|0||
+sleepy/positive_delay_enabled.kt|SLEEPY_TEST|1|true|
+conditional/positive_if_statement.kt|CONDITIONAL_TEST_LOGIC|1||
+conditional/positive_when_statement.kt|CONDITIONAL_TEST_LOGIC|1||
+conditional/negative_value_if.kt|CONDITIONAL_TEST_LOGIC|0||
+exception/positive_try_catch.kt|EXCEPTION_HANDLING|1||
+exception/negative_assert_fails.kt|EXCEPTION_HANDLING|0||
+ignored/positive_bang.kt|IGNORED_TEST|1||
+ignored/positive_xprefixed.kt|IGNORED_TEST|1||
+ignored/negative_normal.kt|IGNORED_TEST|0||
+ignored/positive_class_annotation.kt|IGNORED_TEST|1||
+duplicate/positive.kt|DUPLICATE_ASSERT|1||
+duplicate/negative.kt|DUPLICATE_ASSERT|0||
+magic/positive_int.kt|MAGIC_NUMBER_TEST|1||
+magic/positive_underscore.kt|MAGIC_NUMBER_TEST|1||
+magic/positive_hex.kt|MAGIC_NUMBER_TEST|1||
+magic/positive_float.kt|MAGIC_NUMBER_TEST|1||
+magic/negative_allowed.kt|MAGIC_NUMBER_TEST|0||
+magic/negative_non_assertion_call.kt|MAGIC_NUMBER_TEST|0||
+roulette/positive.kt|ASSERTION_ROULETTE|1||
+roulette/negative.kt|ASSERTION_ROULETTE|0||

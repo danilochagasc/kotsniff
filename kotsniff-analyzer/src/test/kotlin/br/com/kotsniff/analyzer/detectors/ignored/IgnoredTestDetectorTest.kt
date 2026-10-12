@@ -25,14 +25,14 @@ class IgnoredTestDetectorTest :
             it("should detect bang prefix in StringSpec") {
                 val results = engine.analyze(ignoredStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe IGNORED_TEST
+                results.first().ruleId shouldBe IGNORED_TEST
                 results.first().codeSnippet.startsWith("\"!ignored string test\"") shouldBe true
             }
 
             it("should detect xtest in FunSpec") {
                 val results = engine.analyze(ignoredFunSpec(), FILE_PATH_FUN_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe IGNORED_TEST
+                results.first().ruleId shouldBe IGNORED_TEST
                 results.first().codeSnippet.startsWith("xtest(\"ignored fun test\")") shouldBe true
             }
 
@@ -60,7 +60,7 @@ class IgnoredTestDetectorTest :
                         FILE_PATH_CLASS_IGNORED,
                     )
                 results shouldHaveSize 1
-                results.first().smellType shouldBe IGNORED_TEST
+                results.first().ruleId shouldBe IGNORED_TEST
                 results.first().codeSnippet shouldBe "@Ignored"
             }
 
@@ -71,7 +71,7 @@ class IgnoredTestDetectorTest :
                         IgnoredTestDetectorFixture.FILE_PATH_CLASS_IGNORED_INIT,
                     )
                 results shouldHaveSize 1
-                results.first().smellType shouldBe IGNORED_TEST
+                results.first().ruleId shouldBe IGNORED_TEST
                 results.first().codeSnippet shouldBe "@Ignored"
             }
         }

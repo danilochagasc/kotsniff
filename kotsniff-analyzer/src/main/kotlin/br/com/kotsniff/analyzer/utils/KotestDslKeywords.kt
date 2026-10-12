@@ -37,5 +37,25 @@ object KotestDslKeywords {
 
     val ALL_DSL_NAMES = ALL_CONTAINERS + ALL_TERMINALS
 
-    val ASSERTION_PREFIXES = setOf("assert", "should", "expect")
+    /**
+     * Canonical Kotest base spec types. Used to decide whether a class is a test
+     * spec. Kotest specs may also be defined indirectly (a local base class that
+     * extends one of these), which [KotestBlockExtractor] resolves within a file.
+     */
+    val KNOWN_SPEC_SUPERTYPES =
+        setOf(
+            "StringSpec",
+            "FunSpec",
+            "BehaviorSpec",
+            "DescribeSpec",
+            "ShouldSpec",
+            "ExpectSpec",
+            "FreeSpec",
+            "WordSpec",
+            "FeatureSpec",
+            "AnnotationSpec",
+        )
+
+    /** Heuristic: a supertype whose simple name ends with `Spec`. */
+    fun looksLikeSpecName(simpleName: String): Boolean = simpleName in KNOWN_SPEC_SUPERTYPES || simpleName.endsWith("Spec")
 }

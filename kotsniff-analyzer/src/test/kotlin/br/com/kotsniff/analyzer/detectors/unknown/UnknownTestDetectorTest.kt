@@ -24,25 +24,25 @@ class UnknownTestDetectorTest :
             it("should detect no assertions in StringSpec") {
                 val results = engine.analyze(unknownTestStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe UNKNOWN_TEST
+                results.first().ruleId shouldBe UNKNOWN_TEST
             }
 
             it("should detect no assertions in FunSpec") {
                 val results = engine.analyze(unknownTestFunSpec(), FILE_PATH_FUN_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe UNKNOWN_TEST
+                results.first().ruleId shouldBe UNKNOWN_TEST
             }
 
             it("should detect no assertions in BehaviorSpec") {
                 val results = engine.analyze(unknownTestBehaviorSpec(), FILE_PATH_BEHAVIOR_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe UNKNOWN_TEST
+                results.first().ruleId shouldBe UNKNOWN_TEST
             }
 
             it("should detect no assertions in DescribeSpec") {
                 val results = engine.analyze(unknownTestDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe UNKNOWN_TEST
+                results.first().ruleId shouldBe UNKNOWN_TEST
             }
 
             it("should NOT detect unknown test when using mock verification like coVerify") {

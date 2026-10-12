@@ -21,39 +21,45 @@ class SleepyTestDetectorTest :
     DescribeSpec({
         describe("SleepyTestDetector") {
             val engine = KotSniffEngine(listOf(SleepyTestDetector()))
+            val delayEngine = KotSniffEngine(listOf(SleepyTestDetector(reportDelay = true)))
 
             it("should detect Thread.sleep in StringSpec") {
                 val results = engine.analyze(sleepyStringSpec(), FILE_PATH_STRING_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe SLEEPY_TEST
+                results.first().ruleId shouldBe SLEEPY_TEST
                 results.first().codeSnippet shouldBe "Thread.sleep(1000)"
             }
 
-            it("should detect delay in FunSpec") {
+            it("should NOT detect delay by default") {
                 val results = engine.analyze(sleepyFunSpec(), FILE_PATH_FUN_SPEC)
+                results shouldHaveSize 0
+            }
+
+            it("should detect delay in FunSpec when reportDelay is enabled") {
+                val results = delayEngine.analyze(sleepyFunSpec(), FILE_PATH_FUN_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe SLEEPY_TEST
+                results.first().ruleId shouldBe SLEEPY_TEST
                 results.first().codeSnippet shouldBe "delay(500L)"
             }
 
             it("should detect Thread.sleep in BehaviorSpec") {
                 val results = engine.analyze(sleepyBehaviorSpec(), FILE_PATH_BEHAVIOR_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe SLEEPY_TEST
+                results.first().ruleId shouldBe SLEEPY_TEST
                 results.first().codeSnippet shouldBe "Thread.sleep(500)"
             }
 
-            it("should detect delay in DescribeSpec") {
-                val results = engine.analyze(sleepyDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
+            it("should detect delay in DescribeSpec when reportDelay is enabled") {
+                val results = delayEngine.analyze(sleepyDescribeSpec(), FILE_PATH_DESCRIBE_SPEC)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe SLEEPY_TEST
+                results.first().ruleId shouldBe SLEEPY_TEST
                 results.first().codeSnippet shouldBe "delay(100L)"
             }
 
             it("should detect Thread.sleep in DescribeSpec with init block") {
                 val results = engine.analyze(sleepyDescribeSpecInit(), FILE_PATH_DESCRIBE_SPEC_INIT)
                 results shouldHaveSize 1
-                results.first().smellType shouldBe SLEEPY_TEST
+                results.first().ruleId shouldBe SLEEPY_TEST
                 results.first().codeSnippet shouldBe "Thread.sleep(100)"
             }
         }

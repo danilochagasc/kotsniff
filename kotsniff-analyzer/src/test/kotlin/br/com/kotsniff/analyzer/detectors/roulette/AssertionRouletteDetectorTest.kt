@@ -23,7 +23,7 @@ class AssertionRouletteDetectorTest :
 
                 // Should find 1 smell for the 'it' block with 4 assertions, but ignore the 'it' block with 2.
                 results shouldHaveSize 1
-                results.first().smellType shouldBe ASSERTION_ROULETTE
+                results.first().ruleId shouldBe ASSERTION_ROULETTE
             }
 
             it("should detect assertion roulette with default threshold (3) when block has 4 assertions in StringSpec") {
@@ -31,7 +31,7 @@ class AssertionRouletteDetectorTest :
                 val results = engine.analyze(rouletteStringSpec(), FILE_PATH_ROULETTE_STRING_SPEC)
 
                 results shouldHaveSize 1
-                results.first().smellType shouldBe ASSERTION_ROULETTE
+                results.first().ruleId shouldBe ASSERTION_ROULETTE
             }
 
             it("should detect assertion roulette with default threshold (3) when block has 4 assertions in init block") {
@@ -39,7 +39,7 @@ class AssertionRouletteDetectorTest :
                 val results = engine.analyze(rouletteInitSpec(), FILE_PATH_ROULETTE_INIT_SPEC)
 
                 results shouldHaveSize 1
-                results.first().smellType shouldBe ASSERTION_ROULETTE
+                results.first().ruleId shouldBe ASSERTION_ROULETTE
             }
 
             it("should NOT detect assertion roulette when configured with maxAssertions = 5 and block has 4 assertions") {

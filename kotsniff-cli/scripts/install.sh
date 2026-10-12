@@ -18,9 +18,12 @@ echo "Installing KotSniff CLI to $TARGET_DIR..."
 if [ -d "$TARGET_DIR" ]; then
     rm -rf "$TARGET_DIR"
 fi
+mkdir -p "$TARGET_DIR"
 
-# Copy the compiled application
-cp -r "$INSTALL_DIST_DIR" "$TARGET_DIR"
+# Copy the compiled application contents (bin/, lib/) directly into the target,
+# so the launcher ends up at <target>/bin/kotsniff regardless of whether the
+# target directory already existed.
+cp -r "$INSTALL_DIST_DIR"/* "$TARGET_DIR"
 
 # Ensure the executable has execution permissions
 chmod +x "$BIN_DIR/kotsniff"
