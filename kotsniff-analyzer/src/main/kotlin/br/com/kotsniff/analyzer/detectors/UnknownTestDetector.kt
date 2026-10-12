@@ -1,21 +1,18 @@
 package br.com.kotsniff.analyzer.detectors
 
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionCall
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionOperation
+import br.com.kotsniff.analyzer.utils.Assertions.collectAssertionUnits
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell.UNKNOWN_TEST
 import br.com.kotsniff.core.models.Diagnostic
-import org.jetbrains.kotlin.psi.KtBinaryExpression
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
 /**
  * Detects leaf tests that contain neither assertions nor mock verifications.
  *
- * **Limitation:** assertions performed inside a helper function called from the
- * test are not visible without whole-program analysis, so such tests are
- * reported. This is a documented false positive (see the reference corpus).
+ * Assertion counting uses the shared [collectAssertionUnits] policy. **Known
+ * limitations** (see README): assertions performed inside a helper function
+ * called from the test are not visible without whole-program analysis, and a
+ * lambda argument is assumed to execute. Both can cause false positives.
  */
 class UnknownTestDetector : TestSmellDetector {
     override val id = UNKNOWN_TEST
@@ -26,21 +23,7 @@ class UnknownTestDetector : TestSmellDetector {
     ): List<Diagnostic> {
         if (!testBlock.isTerminal) return emptyList()
 
-        var assertionCount = 0
-
-        testBlock.body.accept(
-            object : KtTreeVisitorVoid() {
-                override fun visitCallExpression(expression: KtCallExpression) {
-                    if (expression.isAssertionCall()) assertionCount++
-                    super.visitCallExpression(expression)
-                }
-
-                override fun visitBinaryExpression(expression: KtBinaryExpression) {
-                    if (expression.isAssertionOperation()) assertionCount++
-                    super.visitBinaryExpression(expression)
-                }
-            },
-        )
+        val assertionCount = collectAssertionUnits(testBlock.body).size
 
         if (assertionCount == 0) {
             return listOf(

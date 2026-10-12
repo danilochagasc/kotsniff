@@ -15,7 +15,7 @@ class ConfigLoaderTest :
             val file =
                 writeTemp(
                     """
-                    { "exclude": ["**/build/**"], "disabledRules": ["MAGIC_NUMBER_TEST"], "maxAssertions": 5, "reportDelay": true, "allowedNumbers": ["404", "200"] }
+                    { "exclude": ["**/build/**"], "disabledRules": ["MAGIC_NUMBER_TEST"], "maxAssertions": 5, "reportDelay": true, "allowedNumbers": ["404", "200"], "reportMaxLines": 500 }
                     """.trimIndent(),
                 )
             val config = ConfigLoader.load(file)!!
@@ -24,6 +24,7 @@ class ConfigLoaderTest :
             config.maxAssertions shouldBe 5
             config.reportDelay shouldBe true
             config.allowedNumbers shouldBe listOf("404", "200")
+            config.reportMaxLines shouldBe 500
         }
 
         test("parses severity overrides") {

@@ -130,18 +130,17 @@ class KotestBlockExtractor : KtTreeVisitorVoid() {
 
     private fun tryExtractFromBinaryExpression(expression: KtBinaryExpression) {
         val operation = expression.operationReference.text
-        if (operation in TestDslKeywords.ALL_DSL_NAMES) {
-            val left = expression.left?.text?.removeSurrounding("\"") ?: return
-            val right = expression.right ?: return
+        if (operation !in TestDslKeywords.BINARY_CONTAINER_OPERATORS) return
 
-            // Kotest DSL blocks always have a lambda on the right side
-            if (right !is KtLambdaExpression) return
+        val left = expression.left?.text?.removeSurrounding("\"") ?: return
+        val right = expression.right ?: return
 
-            // In FreeSpec and WordSpec, the right side is the lambda containing nested tests
-            // e.g. "container" - { ... }
-            val isTerminal = operation in TestDslKeywords.ALL_TERMINALS
-            _foundTests.add(KotestBlock(left, right, expression, isTerminal))
-        }
+        // Kotest DSL blocks always have a lambda on the right side
+        if (right !is KtLambdaExpression) return
+
+        // Infix forms (`"name" - { }`, `"name" should { }`, `"name" When { }`) are
+        // always containers; WordSpec/FreeSpec leaves are plain string-invokes.
+        _foundTests.add(KotestBlock(left, right, expression, isTerminal = false))
     }
 
     private fun tryExtractTestBlock(expression: KtCallExpression) {

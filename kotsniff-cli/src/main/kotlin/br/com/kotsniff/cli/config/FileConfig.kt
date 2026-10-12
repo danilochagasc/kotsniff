@@ -15,4 +15,5 @@ data class FileConfig(
     val reportDelay: Boolean? = null,
     val allowedNumbers: List<String>? = null,
     val severities: Map<String, String> = emptyMap(),
+    val reportMaxLines: Int? = null,
 )

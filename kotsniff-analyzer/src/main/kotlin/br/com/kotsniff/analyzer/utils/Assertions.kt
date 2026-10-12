@@ -2,7 +2,11 @@ package br.com.kotsniff.analyzer.utils
 
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
+import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
 /**
  * Centralised recognition of **assertions** and **mock verifications**.
@@ -82,5 +86,53 @@ object Assertions {
             is KtNameReferenceExpression -> callee.getReferencedName()
             else -> callee.text
         }
+    }
+
+    /**
+     * Collects the **assertion units** inside [root], applying the single,
+     * consistent policy shared by every detector:
+     *
+     * - A recognised assertion/verification call (or infix matcher) is **one**
+     *   unit; traversal does **not** descend into it, so nested matchers inside
+     *   the same assertion expression are not counted again. This makes
+     *   compound helpers such as `assertSoftly { ... }` / `assertAll { ... }`
+     *   count as a single logical assertion instead of wrapper + children.
+     * - For a dot-qualified matcher (`x.shouldBe(y)`) the unit is the whole
+     *   qualified expression, so its text keeps the receiver.
+     * - Assertions nested inside ordinary calls/lambdas (e.g.
+     *   `list.forEach { it shouldBe 1 }`) are still found, because those calls
+     *   are not assertions and traversal continues through them.
+     *
+     * The returned units are in source order.
+     */
+    fun collectAssertionUnits(root: KtElement): List<KtExpression> {
+        val units = mutableListOf<KtExpression>()
+        root.accept(
+            object : KtTreeVisitorVoid() {
+                override fun visitCallExpression(expression: KtCallExpression) {
+                    if (expression.isAssertionCall()) {
+                        val parent = expression.parent
+                        val unit =
+                            if (parent is KtDotQualifiedExpression && parent.selectorExpression === expression) {
+                                parent
+                            } else {
+                                expression
+                            }
+                        units.add(unit)
+                        return
+                    }
+                    super.visitCallExpression(expression)
+                }
+
+                override fun visitBinaryExpression(expression: KtBinaryExpression) {
+                    if (expression.isAssertionOperation()) {
+                        units.add(expression)
+                        return
+                    }
+                    super.visitBinaryExpression(expression)
+                }
+            },
+        )
+        return units
     }
 }

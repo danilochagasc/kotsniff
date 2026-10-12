@@ -38,6 +38,15 @@ object KotestDslKeywords {
     val ALL_DSL_NAMES = ALL_CONTAINERS + ALL_TERMINALS
 
     /**
+     * DSL forms written as **infix binary expressions** (`"name" - { }`,
+     * `"name" should { }`, `"name" When { }`). Unlike the call forms, these are
+     * always *containers*: WordSpec/FreeSpec express leaf tests via a plain
+     * string-invoke (`"name" { }`), never via the infix operator. Treating them
+     * as terminals would leak nested tests' assertions into the container.
+     */
+    val BINARY_CONTAINER_OPERATORS = FREE_SPEC_CONTAINERS + WORD_SPEC_CONTAINERS
+
+    /**
      * Canonical Kotest base spec types. Used to decide whether a class is a test
      * spec. Kotest specs may also be defined indirectly (a local base class that
      * extends one of these), which [KotestBlockExtractor] resolves within a file.

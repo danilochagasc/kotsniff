@@ -1,20 +1,20 @@
 package br.com.kotsniff.analyzer.detectors
 
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionCall
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionOperation
+import br.com.kotsniff.analyzer.utils.Assertions.collectAssertionUnits
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell.ASSERTION_ROULETTE
 import br.com.kotsniff.core.models.Diagnostic
-import org.jetbrains.kotlin.psi.KtBinaryExpression
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 
 /**
  * Detects tests with too many assertions in a single block.
  *
  * When a test has many assertions, a failure message rarely points to the
  * specific broken expectation, forcing the developer to debug the whole test.
+ *
+ * Assertions are counted with the shared [collectAssertionUnits] policy: each
+ * assertion call/infix matcher is one unit, and nested expressions (including
+ * compound helpers such as `assertSoftly { ... }`) are not counted again.
  */
 class AssertionRouletteDetector(
     private val maxAssertions: Int = 3,
@@ -27,21 +27,7 @@ class AssertionRouletteDetector(
     ): List<Diagnostic> {
         if (!testBlock.isTerminal) return emptyList()
 
-        var assertionCount = 0
-
-        testBlock.body.accept(
-            object : KtTreeVisitorVoid() {
-                override fun visitCallExpression(expression: KtCallExpression) {
-                    if (expression.isAssertionCall()) assertionCount++
-                    super.visitCallExpression(expression)
-                }
-
-                override fun visitBinaryExpression(expression: KtBinaryExpression) {
-                    if (expression.isAssertionOperation()) assertionCount++
-                    super.visitBinaryExpression(expression)
-                }
-            },
-        )
+        val assertionCount = collectAssertionUnits(testBlock.body).size
 
         if (assertionCount > maxAssertions) {
             return listOf(

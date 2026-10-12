@@ -5,6 +5,7 @@ import br.com.kotsniff.analyzer.KotSniffEngine
 import br.com.kotsniff.analyzer.utils.NumericLiterals
 import br.com.kotsniff.cli.config.ConfigLoader
 import br.com.kotsniff.cli.config.FileConfig
+import br.com.kotsniff.cli.config.NumericOptions
 import br.com.kotsniff.cli.interactive.SeverityConfigSession
 import br.com.kotsniff.cli.interactive.SeverityConfigurator
 import br.com.kotsniff.cli.interactive.SeverityMenuControl
@@ -81,8 +82,8 @@ class AnalyzeCommand :
     ).choice("full", "snippet").default("full")
     private val reportMaxLines by option(
         "--report-max-lines",
-        help = "Max lines embedded per file before context windowing (HTML)",
-    ).int().default(2000)
+        help = "Max lines embedded per file before context windowing (HTML; must be >= 1)",
+    ).int()
     private val noFail by option("--no-fail", help = "Exit with code 0 even when smells are found").flag(default = false)
     private val noColor by option("--no-color", help = "Disable ANSI colors in the terminal output").flag(default = false)
     private val quiet by option("-q", "--quiet", help = "Only print errors and the report path").flag(default = false)
@@ -137,10 +138,22 @@ class AnalyzeCommand :
                 printer.printError(e.message ?: "Invalid severity configuration")
                 throw ProgramResult(ExitCodes.ERROR)
             }
+
+        // Validate numeric settings before the (possibly expensive) scan.
+        val effectiveMaxAssertions: Int
+        val effectiveReportMaxLines: Int
+        try {
+            effectiveMaxAssertions = NumericOptions.resolveMaxAssertions(maxAssertions, config?.maxAssertions)
+            effectiveReportMaxLines = NumericOptions.resolveReportMaxLines(reportMaxLines, config?.reportMaxLines)
+        } catch (e: IllegalArgumentException) {
+            printer.printError(e.message ?: "Invalid numeric option")
+            throw ProgramResult(ExitCodes.ERROR)
+        }
+
         val settings =
             AnalysisSettings(
                 disabledRules = disabledRules,
-                maxAssertions = maxAssertions ?: config?.maxAssertions ?: 3,
+                maxAssertions = effectiveMaxAssertions,
                 reportDelay = reportDelay || (config?.reportDelay ?: false),
                 allowedNumbers = allowedNumbers,
                 severityOverrides = severityOverrides,
@@ -177,7 +190,7 @@ class AnalyzeCommand :
 
         val outputFile = resolveOutputFile(targetDir)
         val report = buildReport(targetDir, scan, timeTakenMs)
-        reportGenerator().generate(report, outputFile, targetDir)
+        reportGenerator(effectiveReportMaxLines).generate(report, outputFile, targetDir)
 
         printer.printReportLocation(outputFile.absolutePath)
         printer.printFailedFiles(scan.failedFiles)
@@ -334,7 +347,7 @@ class AnalyzeCommand :
         )
     }
 
-    private fun reportGenerator(): ReportGenerator =
+    private fun reportGenerator(maxFileLines: Int): ReportGenerator =
         when (format) {
             "markdown" -> {
                 MarkdownReportGenerator()
@@ -352,7 +365,7 @@ class AnalyzeCommand :
                         } else {
                             HtmlReportGenerator.SourceMode.FULL
                         },
-                    maxFileLines = reportMaxLines,
+                    maxFileLines = maxFileLines,
                 )
             }
 

@@ -1,34 +1,40 @@
-# KotSniff reference corpus manifest (pipe-separated).
-# Columns: file | rule | expectedCount | reportDelay | limitation
-# - expectedCount is the number of diagnostics of `rule` the file must produce.
-# - reportDelay enables the opt-in Sleepy Test `delay(...)` detection.
-# - limitation, when present, documents a knowingly unsupported behaviour; such
-#   cases are asserted (as regression guards) but excluded from the metrics.
-unknown/positive_no_assertion.kt|UNKNOWN_TEST|1||
-unknown/negative_with_assertion.kt|UNKNOWN_TEST|0||
-unknown/negative_with_verify.kt|UNKNOWN_TEST|0||
-unknown/positive_domain_name.kt|UNKNOWN_TEST|1||
-unknown/limitation_helper_assertion.kt|UNKNOWN_TEST|1||Assertions inside helper functions are not visible without whole-program analysis.
-sleepy/positive_thread_sleep.kt|SLEEPY_TEST|1||
-sleepy/negative_delay_default.kt|SLEEPY_TEST|0||
-sleepy/negative_other_sleep.kt|SLEEPY_TEST|0||
-sleepy/positive_delay_enabled.kt|SLEEPY_TEST|1|true|
-conditional/positive_if_statement.kt|CONDITIONAL_TEST_LOGIC|1||
-conditional/positive_when_statement.kt|CONDITIONAL_TEST_LOGIC|1||
-conditional/negative_value_if.kt|CONDITIONAL_TEST_LOGIC|0||
-exception/positive_try_catch.kt|EXCEPTION_HANDLING|1||
-exception/negative_assert_fails.kt|EXCEPTION_HANDLING|0||
-ignored/positive_bang.kt|IGNORED_TEST|1||
-ignored/positive_xprefixed.kt|IGNORED_TEST|1||
-ignored/negative_normal.kt|IGNORED_TEST|0||
-ignored/positive_class_annotation.kt|IGNORED_TEST|1||
-duplicate/positive.kt|DUPLICATE_ASSERT|1||
-duplicate/negative.kt|DUPLICATE_ASSERT|0||
-magic/positive_int.kt|MAGIC_NUMBER_TEST|1||
-magic/positive_underscore.kt|MAGIC_NUMBER_TEST|1||
-magic/positive_hex.kt|MAGIC_NUMBER_TEST|1||
-magic/positive_float.kt|MAGIC_NUMBER_TEST|1||
-magic/negative_allowed.kt|MAGIC_NUMBER_TEST|0||
-magic/negative_non_assertion_call.kt|MAGIC_NUMBER_TEST|0||
-roulette/positive.kt|ASSERTION_ROULETTE|1||
-roulette/negative.kt|ASSERTION_ROULETTE|0||
+# KotSniff reference corpus manifest (pipe-separated, one line per fixture).
+#
+# Columns: file | reportDelay | occurrences
+# - occurrences: ';'-separated expected findings as RULE@line:column (1-based).
+#   An empty column means the fixture must produce NO diagnostics at all.
+#   A leading '~' marks a documented limitation: it is asserted (regression
+#   guard) but excluded from the aggregate metrics.
+# - reportDelay: enables the opt-in Sleepy Test delay(...) detection for that file.
+#
+# The expectations are hand-annotated from each fixture's source (reviewed when
+# the corpus was extended). They are SYNTHETIC regression expectations, not
+# evidence about real-world precision.
+conditional/negative_value_if.kt||MAGIC_NUMBER_TEST@9:20
+conditional/positive_if_statement.kt||UNKNOWN_TEST@6:5;CONDITIONAL_TEST_LOGIC@7:9
+conditional/positive_when_statement.kt||UNKNOWN_TEST@6:5;CONDITIONAL_TEST_LOGIC@7:9
+duplicate/negative.kt||MAGIC_NUMBER_TEST@11:20
+duplicate/positive.kt||DUPLICATE_ASSERT@10:9
+exception/negative_assert_fails.kt||
+exception/positive_try_catch.kt||UNKNOWN_TEST@6:5;EXCEPTION_HANDLING@7:9
+ignored/negative_normal.kt||
+ignored/positive_bang.kt||UNKNOWN_TEST@6:5;IGNORED_TEST@6:5
+ignored/positive_class_annotation.kt||IGNORED_TEST@7:1;MAGIC_NUMBER_TEST@13:9;MAGIC_NUMBER_TEST@13:20
+ignored/positive_xprefixed.kt||UNKNOWN_TEST@6:5;IGNORED_TEST@6:5
+magic/negative_allowed.kt||
+magic/negative_non_assertion_call.kt||UNKNOWN_TEST@6:5
+magic/positive_float.kt||MAGIC_NUMBER_TEST@9:24
+magic/positive_hex.kt||MAGIC_NUMBER_TEST@9:20
+magic/positive_int.kt||MAGIC_NUMBER_TEST@9:23
+magic/positive_underscore.kt||MAGIC_NUMBER_TEST@9:20
+roulette/negative.kt||MAGIC_NUMBER_TEST@9:28
+roulette/positive.kt||ASSERTION_ROULETTE@7:5;MAGIC_NUMBER_TEST@9:28;MAGIC_NUMBER_TEST@11:26;MAGIC_NUMBER_TEST@12:14;MAGIC_NUMBER_TEST@12:26
+sleepy/negative_delay_default.kt||UNKNOWN_TEST@6:5
+sleepy/negative_other_sleep.kt||UNKNOWN_TEST@6:5
+sleepy/positive_delay_enabled.kt|true|UNKNOWN_TEST@6:5;SLEEPY_TEST@7:9
+sleepy/positive_thread_sleep.kt||UNKNOWN_TEST@6:5;SLEEPY_TEST@7:9
+unknown/limitation_helper_assertion.kt||~UNKNOWN_TEST@6:5
+unknown/negative_with_assertion.kt||
+unknown/negative_with_verify.kt||
+unknown/positive_domain_name.kt||UNKNOWN_TEST@6:5
+unknown/positive_no_assertion.kt||UNKNOWN_TEST@6:5

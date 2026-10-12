@@ -1,14 +1,11 @@
 package br.com.kotsniff.analyzer.detectors
 
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionCall
-import br.com.kotsniff.analyzer.utils.Assertions.isAssertionOperation
+import br.com.kotsniff.analyzer.utils.Assertions.collectAssertionUnits
 import br.com.kotsniff.analyzer.utils.NumericLiterals
 import br.com.kotsniff.analyzer.utils.toCodeLocation
 import br.com.kotsniff.analyzer.visitors.KotestBlock
 import br.com.kotsniff.core.enums.TestSmell.MAGIC_NUMBER_TEST
 import br.com.kotsniff.core.models.Diagnostic
-import org.jetbrains.kotlin.psi.KtBinaryExpression
-import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
@@ -16,9 +13,10 @@ import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 /**
  * Detects arbitrary numeric literals used inside assertions.
  *
- * Only literals that appear inside a recognised assertion are inspected, so
- * numeric arguments to unrelated helper calls are not reported. Values in
- * [allowedNumbers] (self-explanatory constants) are ignored.
+ * Assertion targets come from the shared [collectAssertionUnits] policy; each
+ * unit's whole subtree is inspected, so literals inside compound helpers such
+ * as `assertSoftly { ... }` are still reported. Values in [allowedNumbers]
+ * (self-explanatory constants) are ignored.
  */
 class MagicNumberTestDetector(
     private val allowedNumbers: Set<String> = NumericLiterals.DEFAULT_ALLOWED,
@@ -32,25 +30,9 @@ class MagicNumberTestDetector(
         if (!testBlock.isTerminal) return emptyList()
 
         val results = mutableListOf<Diagnostic>()
-
-        testBlock.body.accept(
-            object : KtTreeVisitorVoid() {
-                override fun visitCallExpression(expression: KtCallExpression) {
-                    if (expression.isAssertionCall()) {
-                        inspectForMagicNumbers(expression, filePath, results)
-                    }
-                    super.visitCallExpression(expression)
-                }
-
-                override fun visitBinaryExpression(expression: KtBinaryExpression) {
-                    if (expression.isAssertionOperation()) {
-                        inspectForMagicNumbers(expression, filePath, results)
-                    }
-                    super.visitBinaryExpression(expression)
-                }
-            },
-        )
-
+        collectAssertionUnits(testBlock.body).forEach { unit ->
+            inspectForMagicNumbers(unit, filePath, results)
+        }
         return results
     }
 

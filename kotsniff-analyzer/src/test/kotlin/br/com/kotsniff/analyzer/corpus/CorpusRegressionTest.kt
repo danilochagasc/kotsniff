@@ -2,32 +2,38 @@ package br.com.kotsniff.analyzer.corpus
 
 import br.com.kotsniff.analyzer.AnalysisSettings
 import br.com.kotsniff.analyzer.KotSniffEngine
-import br.com.kotsniff.core.enums.TestSmell
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
 import java.util.Locale
 
-private data class CorpusCase(
+private data class CorpusFile(
     val file: String,
-    val rule: String,
-    val expected: Int,
     val reportDelay: Boolean,
-    val limitation: String?,
+    /** Expected findings as `RULE@line:column` (limitations excluded). */
+    val expected: Set<String>,
+    /** Documented limitations: asserted as regression guards, excluded from metrics. */
+    val limitations: Set<String>,
 )
 
+private const val LIMITATION_MARK = "~"
+
 /**
- * Runs the hand-annotated reference corpus and asserts every case.
+ * Runs the hand-annotated reference corpus and asserts every fixture against an
+ * **occurrence-level** expectation (`RULE@line:column`), not just a count:
  *
- * The corpus is deliberately small and synthetic: it measures **conformance to
- * documented expectations**, not precision/recall on real projects. Cases
- * flagged with a limitation describe behaviours that are knowingly unsupported
- * (e.g. assertions hidden in helper functions); they are asserted to guard
- * against change but excluded from the aggregate metrics.
+ * - a missing finding, an unexpected finding, a wrong location or a duplicate
+ *   finding all make the set comparison fail;
+ * - a wrong rule identifier shows up as a set mismatch.
+ *
+ * The corpus is **synthetic**. Its metrics describe conformance to these
+ * hand-written expectations; they are **not** evidence of real-world precision
+ * or recall. Occurrences marked with `~` document knowingly unsupported
+ * behaviour and are asserted as guards but excluded from the metrics.
  */
 class CorpusRegressionTest :
     FunSpec({
-        val cases = loadManifest()
+        val corpus = loadManifest()
         val engines = mutableMapOf<Boolean, KotSniffEngine>()
 
         fun engineFor(reportDelay: Boolean): KotSniffEngine =
@@ -35,49 +41,57 @@ class CorpusRegressionTest :
                 KotSniffEngine.createDefault(AnalysisSettings(reportDelay = reportDelay))
             }
 
-        fun detectedCount(case: CorpusCase): Int {
-            val rule = TestSmell.valueOf(case.rule)
-            return engineFor(case.reportDelay)
-                .analyze(readResource("corpus/${case.file}"), case.file)
-                .count { it.ruleId == rule }
-        }
+        fun actualOccurrences(
+            file: CorpusFile,
+            diagnostics: List<br.com.kotsniff.core.models.Diagnostic> =
+                engineFor(file.reportDelay)
+                    .analyze(readResource("corpus/${file.file}"), file.file),
+        ): List<String> = diagnostics.map { "${it.ruleId.name}@${it.location.line}:${it.location.column}" }
 
-        test("every corpus case matches its expected detection count") {
-            cases.forEach { case ->
-                val detected = detectedCount(case)
-                withClue("${case.file} [${case.rule}] expected ${case.expected} but got $detected") {
-                    detected shouldBe case.expected
+        test("every fixture matches its expected occurrence set exactly") {
+            corpus.forEach { file ->
+                val actualList = actualOccurrences(file)
+                val actualSet = actualList.toSet()
+                val expectedAll = file.expected + file.limitations
+
+                withClue("${file.file}: duplicated findings detected ($actualList)") {
+                    actualList.size shouldBe actualSet.size
+                }
+                withClue("${file.file}: expected $expectedAll but got $actualSet") {
+                    actualSet shouldBe expectedAll
                 }
             }
         }
 
-        test("aggregate metrics are computed and non-regressed") {
+        test("occurrence-level corpus metrics are computed and non-regressed") {
             val metrics = linkedMapOf<String, Metrics>()
-            cases
-                .filter { it.limitation == null }
-                .forEach { case ->
-                    val detected = detectedCount(case)
-                    val metric = metrics.getOrPut(case.rule) { Metrics() }
-                    metric.truePositives += minOf(detected, case.expected)
-                    metric.falsePositives += maxOf(0, detected - case.expected)
-                    metric.falseNegatives += maxOf(0, case.expected - detected)
+            corpus.forEach { file ->
+                val actual = actualOccurrences(file).toSet() - file.limitations
+                val expected = file.expected
+                val rules = expected.map { ruleOf(it) }.toSet() + actual.map { ruleOf(it) }.toSet()
+                rules.forEach { rule ->
+                    val exp = expected.filter { ruleOf(it) == rule }.toSet()
+                    val act = actual.filter { ruleOf(it) == rule }.toSet()
+                    val metric = metrics.getOrPut(rule) { Metrics() }
+                    metric.truePositives += (exp intersect act).size
+                    metric.falsePositives += (act - exp).size
+                    metric.falseNegatives += (exp - act).size
                 }
+            }
 
             val csv =
                 buildString {
                     appendLine("rule,truePositives,falsePositives,falseNegatives,precision,recall,f1")
                     metrics.forEach { (rule, m) ->
                         appendLine(
-                            "$rule,${m.truePositives},${m.falsePositives},${m.falseNegatives},${fmt(
-                                m.precision,
-                            )},${fmt(m.recall)},${fmt(m.f1)}",
+                            "$rule,${m.truePositives},${m.falsePositives},${m.falseNegatives}," +
+                                "${fmt(m.precision)},${fmt(m.recall)},${fmt(m.f1)}",
                         )
                     }
                 }
-            println("\nCorpus metrics (conformance to hand-annotated expectations):\n$csv")
+            println("\nSynthetic corpus regression metrics (occurrence-level conformance):\n$csv")
             File("build/corpus-metrics.csv").writeText(csv)
 
-            // With exact-match expectations asserted above, no non-limitation case may drift.
             metrics.values.forEach { m ->
                 m.falsePositives shouldBe 0
                 m.falseNegatives shouldBe 0
@@ -85,20 +99,21 @@ class CorpusRegressionTest :
         }
 
         test("known limitations are explicitly documented") {
-            val limitations = cases.filter { it.limitation != null }
-            limitations.forEach { case ->
-                println("Known limitation: ${case.file} [${case.rule}] -> ${case.limitation}")
-            }
-            // The corpus must always state at least the helper-assertion limitation.
+            val limitations = corpus.flatMap { file -> file.limitations.map { "${file.file}: $it" } }
+            limitations.forEach { println("Known limitation: $it") }
             limitations.isNotEmpty() shouldBe true
         }
     })
+
+private fun ruleOf(occurrence: String): String = occurrence.substringBefore('@')
 
 private class Metrics {
     var truePositives = 0
     var falsePositives = 0
     var falseNegatives = 0
 
+    // Zero-denominator convention: precision/recall are 1.0 when there is
+    // nothing to predict/observe (documented in the README).
     val precision: Double
         get() = if (truePositives + falsePositives == 0) 1.0 else truePositives.toDouble() / (truePositives + falsePositives)
 
@@ -111,19 +126,25 @@ private class Metrics {
 
 private fun fmt(value: Double): String = String.format(Locale.US, "%.3f", value)
 
-private fun loadManifest(): List<CorpusCase> =
+private fun loadManifest(): List<CorpusFile> =
     readResource("corpus/manifest.csv")
         .lineSequence()
         .map { it.trim() }
         .filter { it.isNotEmpty() && !it.startsWith("#") }
         .map { line ->
             val parts = line.split("|")
-            CorpusCase(
+            val occurrences =
+                parts
+                    .getOrNull(2)
+                    .orEmpty()
+                    .split(";")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+            CorpusFile(
                 file = parts[0],
-                rule = parts[1],
-                expected = parts[2].toInt(),
-                reportDelay = parts.getOrNull(3)?.equals("true", ignoreCase = true) ?: false,
-                limitation = parts.getOrNull(4)?.takeIf { it.isNotBlank() },
+                reportDelay = parts.getOrNull(1)?.equals("true", ignoreCase = true) ?: false,
+                expected = occurrences.filterNot { it.startsWith(LIMITATION_MARK) }.toSet(),
+                limitations = occurrences.filter { it.startsWith(LIMITATION_MARK) }.map { it.removePrefix(LIMITATION_MARK) }.toSet(),
             )
         }.toList()
 
